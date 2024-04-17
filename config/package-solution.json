@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "soluntion-one-client-side-solution",
+    "id": "ad0fbb70-b7b2-4d5c-819a-a30e4936c7d4",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "SoluntionOne description"
+      },
+      "longDescription": {
+        "default": "SoluntionOne description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "soluntion-one Feature",
+        "description": "The feature that activates elements of the soluntion-one solution.",
+        "id": "e94dc866-75a9-4998-851e-04f4b558d628",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/soluntion-one.sppkg"
+  }
+}
