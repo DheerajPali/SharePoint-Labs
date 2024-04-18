@@ -1,5 +1,5 @@
 export interface IWebpart2Add{
-    Title : "",
-    Body : "",
-    Letter : "",
+    Title : string,
+    Body : string,
+    Letter : string,
 }

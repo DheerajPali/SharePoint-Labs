@@ -25,15 +25,6 @@ export default class IWebpart2 extends React.Component<IWebpart2Props, IWebpart2
   public getAllItems = async () => {
     const sp: any = spfi().using(SPFx(this.props.context));
     const allItems = await sp.web.lists.getByTitle("FAQ List").items.getAll();
-    const iar: [] = await sp.web.lists.getByTitle("FAQ List").items.add({
-      Title: "Title",
-      Body : "this is my webpart's body",
-      Letter : "T"  
-    });
-   
-    // this.setState({
-    //   data : allItems,
-    // });
      this.setState({
       data : allItems,
      })
@@ -42,6 +33,7 @@ export default class IWebpart2 extends React.Component<IWebpart2Props, IWebpart2
 
   componentDidMount(): void {
       this.getAllItems();
+      this.handleSubmit();
   }
 
   handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +44,25 @@ export default class IWebpart2 extends React.Component<IWebpart2Props, IWebpart2
       [name] : value,
     } as Pick <IWebpart2Add, keyof IWebpart2Add>);
   }
+
+  handleSubmit = async () : Promise<void> => {
+    const {Title,Body,Letter} = this.state as{
+          Title : string,
+          Body : string,
+          Letter: string
+    }
+
+    const sp: any = spfi().using(SPFx(this.props.context));
+    const iar: [] = await sp.web.lists.getByTitle("FAQ List").items.add({
+      'Title': Title,
+      'Body' : Body,
+      'Letter' : Letter  
+    });
+    this.getAllItems(); // Refresh data after adding item
+    this.setState({Title : "",Body : "", Letter : ""});
+    
+  }
+
   public render () : React.ReactElement<IWebpart2Props>{
     return(
       <>
@@ -65,23 +76,24 @@ export default class IWebpart2 extends React.Component<IWebpart2Props, IWebpart2
                 <h6>Letter : {item.Letter}</h6>
               </div>
 
-                <div>
-                  <label>Title</label>
-                  <input name="Title" onChange={this.handleChange} value={this.state.Title}></input>
-                </div>
-                <div>
-                  <label>Body</label>
-                  <input name="Body" onChange={this.handleChange} value={this.state.Body}></input>
-                </div>
-                <div>
-                  <label>Letter</label>
-                  <input name="Letter" onChange={this.handleChange} value={this.state.Letter}></input>
-                </div>
                 
                </> 
             )
           })
         }
+            <div>
+              <label>Title</label>
+              <input name="Title" onChange={this.handleChange} value={this.state.Title}></input>
+            </div>
+            <div>
+              <label>Body</label>
+              <input name="Body" onChange={this.handleChange} value={this.state.Body}></input>
+            </div>
+            <div>
+              <label>Letter</label>
+              <input name="Letter" onChange={this.handleChange} value={this.state.Letter}></input>
+            </div>
+            <button type='submit' onClick={this.handleSubmit}>Submit</button>
       </>
     )
   }
