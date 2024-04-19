@@ -1,6 +1,8 @@
 export  interface IWebpart3State{
-    ProfileId : number;
-    ProfileName : string;
-    ProfileJob : string;
-    data : [];
+    ProfileId : number,
+    ProfileName : string,
+    ProfileJob : string,
+    Choice : string,
+    choiceOptions: [],
+    data : [],
 }
