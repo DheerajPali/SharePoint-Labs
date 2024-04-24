@@ -1,6 +1,6 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 
-export interface IWebpart3Props {
+export interface IWebpart4Props {
   description: string;
-  context : any;
+  context : WebPartContext;
 }
