@@ -33,6 +33,14 @@
           "manifest": "./src/webparts/webpart4/Webpart4WebPart.manifest.json"
         }
       ]
+    },
+    "webpart-5-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart5/Webpart5WebPart.js",
+          "manifest": "./src/webparts/webpart5/Webpart5WebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -40,6 +48,7 @@
     "Webpart1WebPartStrings": "lib/webparts/webpart1/loc/{locale}.js",
     "Webpart2WebPartStrings": "lib/webparts/webpart2/loc/{locale}.js",
     "Webpart3WebPartStrings": "lib/webparts/webpart3/loc/{locale}.js",
-    "Webpart4WebPartStrings": "lib/webparts/webpart4/loc/{locale}.js"
+    "Webpart4WebPartStrings": "lib/webparts/webpart4/loc/{locale}.js",
+    "Webpart5WebPartStrings": "lib/webparts/webpart5/loc/{locale}.js"
   }
 }

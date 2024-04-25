@@ -5,4 +5,5 @@ export interface IWebpart4State {
     LookupJob : string,
     data : [],
     lookupOptions :any [],
+    columns: any,
 }
