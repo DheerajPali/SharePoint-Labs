@@ -45,10 +45,24 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
           return <span>{item.LookupJob ? item.LookupJob.ProfileJob : ''}</span>;
         }
       },
+      {
+        key: 'column4',
+        name: 'Actions',
+        fieldName: 'Actions',
+        minWidth: 100,
+        maxWidth: 150,
+        isResizable: true,
+        onRender: (item) => {
+          return (
+            <DefaultButton text="Delete" onClick={() => this.handleDelete(item.ID)} />
+          );
+        }
+      }      
     ];
     
 
     this.state = {
+      ID : '',
       Title: '',
       LookupJob:'',
       data: [],
@@ -71,7 +85,7 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
       const sp1 = sp.web.lists.getByTitle("List1");
-      const items = await sp1.items.select("Title", "LookupJob/ProfileName", "LookupJob/Title", "LookupJob/ProfileJob", "LookupJob/ProfileId").expand("LookupJob").getAll();
+      const items = await sp1.items.select("ID", "Title", "LookupJob/ProfileName", "LookupJob/Title", "LookupJob/ProfileJob", "LookupJob/ProfileId").expand("LookupJob").getAll();
 
       console.log("Retrieved items:", items); // Log retrieved items for debugging
 
@@ -106,7 +120,7 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
   
 
   public handleSubmit = async (selectedKey: string): Promise<void> => {
-    const { Title, LookupJob } = this.state as {
+    const { Title,LookupJob } = this.state as {
       Title: string,
       LookupJob: {},
     };
@@ -146,21 +160,50 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
       this.setState({ LookupJob: ' ' });
     }
   }
-  handleDelete = async (Id:number) => {
-    try{
-      const sp: any = spfi().using(SPFx(this.props.context));
-      const list = sp.web.lists.getByTitle("List1");
-    await list.items.getById(Id).delete();
-      // const sp1 = sp.web.lists.getByTitle("List1");
-      // // const a = await items.getById(item.ID);
-      // await sp1.items.getById(Id).delete();
-      // b.delete();
+  handleDelete = async (Id: React.Key) => {
+    try {
+        console.log("Deleting item with ID:", Id);
+        const sp: any = spfi().using(SPFx(this.props.context));
+        const list = sp.web.lists.getByTitle("List1");
+        await list.items.getById(Id).delete();
+        console.log("Item deleted successfully");
+        await this.getAll(); // Refresh the data after deletion
+        alert('Item deleted successfully');
+    } catch (error) {
+        console.error("Error in delete", error);  
+        alert('Error occurred while deleting item.');
     }
-    catch(error){
-      console.log("Error in delete",error);
-      alert('Error occured.')
-    }
-  }
+}
+
+
+// private handleDelete = async (Id: string) => {
+//   try {
+//     const sp = spfi().using(SPFx(this.props.context));
+//     const list = sp.web.lists.getByTitle("List1");
+
+//     // Retrieve the item that matches the specified Title
+//     const items = await list.items.filter(`Title eq '${title}'`).getAll();
+
+//     if (items.length > 0) {
+//       const itemId = items[0].Id; // Get the Id of the first matching item
+
+//       // Delete the item by its Id
+//       await list.items.getById(itemId).delete();
+
+//       // Refresh the list data after deletion
+//       await this.getAll();
+//       console.log(`Item with title '${title}' deleted successfully.`);
+//       alert(`Item with title '${title}' deleted successfully.`);
+//     } else {
+//       console.log(`No item found with title '${title}'.`);
+//       alert(`No item found with title '${title}'.`)
+//     }
+//   } catch (error) {
+//     console.log("Error deleting item:", error);
+//     alert("Error deleting item:");
+//   }
+// };
+
 
  public render(): React.ReactElement<IWebpart4Props> {
   return (
