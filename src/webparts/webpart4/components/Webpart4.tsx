@@ -57,6 +57,19 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
             <DefaultButton text="Delete" onClick={() => this.handleDelete(item.ID)} />
           );
         }
+      },
+      {
+        key: 'column5',
+        name: 'Action1',
+        fieldName: 'Action1',
+        minWidth: 100,
+        maxWidth: 150,
+        isResizable: true,
+        onRender: (item) => {
+          return (
+            <PrimaryButton text="Edit" onClick={() => (this.handleEdit(item,item.LookupJobId))} />
+          );
+        }
       }      
     ];
     
@@ -175,34 +188,52 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
     }
 }
 
+handleEdit = async (item: any,LookupJobId: number) => {
+  // Populate form fields with the selected item's details
+  this.setState({
+    ID: item.ID,
+    Title: item.Title,
+    LookupJob : item.LookupJob,
+  });
+};
 
-// private handleDelete = async (Id: string) => {
-//   try {
-//     const sp = spfi().using(SPFx(this.props.context));
-//     const list = sp.web.lists.getByTitle("List1");
+handleUpdate = async (selectedKey: string): Promise<void> => {
+  const { ID,Title, data } = this.state;
+  const sp = spfi().using(SPFx(this.props.context));
 
-//     // Retrieve the item that matches the specified Title
-//     const items = await list.items.filter(`Title eq '${title}'`).getAll();
+  // Logging to check if itemId is retrieved correctlya
+  console.log("Existing data:", data);
+  // const itemId = data.find((item: { Id: number, ProfileId : number}) => item.ProfileId === ProfileId)?.Id;
+  const matchingIds = data.filter((item: { ID: React.Key }) => item.ID === ID)
+    .map((item: { Id: number }) => item.Id);
 
-//     if (items.length > 0) {
-//       const itemId = items[0].Id; // Get the Id of the first matching item
+  const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
 
-//       // Delete the item by its Id
-//       await list.items.getById(itemId).delete();
+  console.log(itemId);
+  console.log("Item ID for update:", itemId);
 
-//       // Refresh the list data after deletion
-//       await this.getAll();
-//       console.log(`Item with title '${title}' deleted successfully.`);
-//       alert(`Item with title '${title}' deleted successfully.`);
-//     } else {
-//       console.log(`No item found with title '${title}'.`);
-//       alert(`No item found with title '${title}'.`)
-//     }
-//   } catch (error) {
-//     console.log("Error deleting item:", error);
-//     alert("Error deleting item:");
-//   }
-// };
+  if (itemId) {
+    await sp.web.lists.getByTitle("List1").items.getById(itemId).update({
+      'Title': Title,
+      'LookupJobId': parseInt(selectedKey),
+      
+    });
+
+    // Clear form fields after update
+    this.setState({
+      Title: '',
+      LookupJob: '',
+    });
+
+    // Refresh the list data
+    await this.getAll();
+    alert('Edited Succesfully');
+  } else {
+    console.error("Item ID not found for update.");
+    alert('Something went Wrong');
+  }
+};
+
 
 
  public render(): React.ReactElement<IWebpart4Props> {
@@ -215,7 +246,6 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
               selectionMode={SelectionMode.none}
               getKey={(item) => item.Id} // Assuming there's a unique identifier property like Id
             />
-
             </div>
       <div>
         <TextField label="Title" name="Title" onChange={this.handleChange} value={this.state.Title} />
@@ -228,6 +258,8 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
           data-name="LookupJob" // Add the name property here
         />
         <DefaultButton  text="Submit" onClick={() => this.handleSubmit(this.state.LookupJob)} />
+        {/* <DefaultButton text="Submit" onClick={() => (this.handleSubmit)} allowDisabledFocus /> */}
+        <DefaultButton text="Update" onClick={() => this.handleUpdate(this.state.LookupJob)} allowDisabledFocus />
       </div>
     </>
   );

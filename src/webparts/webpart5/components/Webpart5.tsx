@@ -58,6 +58,19 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
             <DefaultButton text="Delete" onClick={()=>{this.handleDelete(item.ID)}} />
           );
         }
+      },
+      {
+        key: 'column4',
+        name: 'Action1',
+        fieldName: 'Action1',
+        minWidth: 100,
+        maxWidth: 150,
+        isResizable: true,
+        onRender: (item) => {
+          return (
+            <DefaultButton text="Edit" onClick={()=>{this.handleEdit(item)}} />
+          );
+        }
       }      
     ];
     super(props);
@@ -168,6 +181,49 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
     }
 }
 
+public handleEdit = async (item :{Title : string, userEMail : string,userTitle : string , Person : [],ID : number}) => {
+  try {
+    this.setState({
+      Title: item.Title,
+      Person : item.Person,
+      ID : item.ID,
+    });
+  } catch (error) {
+    console.log("Error in handleEdit",error);
+  }
+}
+
+handleUpdate = async (selectedPerson: any): Promise<void> => {
+  const { ID,Title, data } = this.state;
+  const sp = spfi().using(SPFx(this.props.context));
+
+  const matchingIds = data.filter((item: { ID: React.Key }) => item.ID === ID).map((item: { Id: number }) => item.Id);
+
+const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
+
+
+  const user = selectedPerson;
+  if (itemId) {
+    try {
+      const list = await sp.web.lists.getByTitle("List2").items.getById(itemId).update({
+        'Title': Title,
+        // 'Description': description,
+        'PersonId': user.id,
+      })
+        
+      this.getAll();
+      this.setState({ Title: '', Person: '' });
+      alert('Updated Successfully');
+    } catch (error) {
+      console.error('Error adding item:', error);
+      alert('Failed to add item. Please try again.');
+    }
+  } else {
+    alert('Please fill all the fields');
+  }
+};
+
+
  
 
   public handleSubmit = async (selectedPerson : any) : Promise<void> => {
@@ -256,6 +312,7 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
           resolveDelay={1000}
         />
         <DefaultButton text='Submit' onClick={() => {this.handleSubmit(this.state.Person)}} />
+        <DefaultButton text='Update' onClick={() => {this.handleUpdate(this.state.Person)}} />
       </div>
       </>
     );
