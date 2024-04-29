@@ -67,20 +67,20 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
         isResizable: true,
         onRender: (item) => {
           return (
-            <PrimaryButton text="Edit" onClick={() => (this.handleEdit(item,item.LookupJobId))} />
+            <PrimaryButton text="Edit" onClick={() => (this.handleEdit(item, item.LookupJobId))} />
           );
         }
-      }      
+      }
     ];
-    
+
 
     this.state = {
-      ID : '',
+      ID: '',
       Title: '',
-      LookupJob:'',
+      LookupJob: '',
       data: [],
       lookupOptions: [],
-      columns : columns,
+      columns: columns,
     }
   }
 
@@ -113,39 +113,39 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
   public getLookupOptions = async () => {
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
-  
+
       // Select the 'ProfileJob' field when fetching items
-      const spList: any[] = await sp.web.lists.getByTitle("ProfileList").items.select('ID','ProfileJob').getAll();
+      const spList: any[] = await sp.web.lists.getByTitle("ProfileList").items.select('ID', 'ProfileJob').getAll();
       let tempCurreny: any[] = [];
       console.log("spList", spList);
-  
+
       spList.forEach((value: any) => {
         tempCurreny.push({ key: value.ID, text: value.ProfileJob });
       });
-  
+
       console.log("tempCurreny", tempCurreny);
       this.setState({ lookupOptions: tempCurreny });
-  
+
     } catch (error) {
       console.log("Error in getLookupOptions:", error);
     }
   }
-  
+
 
   public handleSubmit = async (selectedKey: string): Promise<void> => {
-    const { Title,LookupJob } = this.state as {
+    const { Title, LookupJob } = this.state as {
       Title: string,
       LookupJob: {},
     };
     const sp: any = spfi().using(SPFx(this.props.context));
-  
+
     if (selectedKey) {
       try {
         const item: any = await sp.web.lists.getByTitle("List1").items.add({
           'Title': Title,
-          'LookupJobId': parseInt(selectedKey), 
+          'LookupJobId': parseInt(selectedKey),
         });
-  
+
         await this.getAll();
         this.setState({ Title: '', LookupJob: '' });
         alert('Added Successfully');
@@ -157,7 +157,7 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
       alert('Please select a value for LookupJob');
     }
   }
-  
+
   handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const name = event.target.name
     const value = event.target.value
@@ -175,94 +175,94 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
   }
   handleDelete = async (Id: React.Key) => {
     try {
-        console.log("Deleting item with ID:", Id);
-        const sp: any = spfi().using(SPFx(this.props.context));
-        const list = sp.web.lists.getByTitle("List1");
-        await list.items.getById(Id).delete();
-        console.log("Item deleted successfully");
-        await this.getAll(); // Refresh the data after deletion
-        alert('Item deleted successfully');
+      console.log("Deleting item with ID:", Id);
+      const sp: any = spfi().using(SPFx(this.props.context));
+      const list = sp.web.lists.getByTitle("List1");
+      await list.items.getById(Id).delete();
+      console.log("Item deleted successfully");
+      await this.getAll(); // Refresh the data after deletion
+      alert('Item deleted successfully');
     } catch (error) {
-        console.error("Error in delete", error);  
-        alert('Error occurred while deleting item.');
+      console.error("Error in delete", error);
+      alert('Error occurred while deleting item.');
     }
-}
-
-handleEdit = async (item: any,LookupJobId: number) => {
-  // Populate form fields with the selected item's details
-  this.setState({
-    ID: item.ID,
-    Title: item.Title,
-    LookupJob : item.LookupJob,
-  });
-};
-
-handleUpdate = async (selectedKey: string): Promise<void> => {
-  const { ID,Title, data } = this.state;
-  const sp = spfi().using(SPFx(this.props.context));
-
-  // Logging to check if itemId is retrieved correctlya
-  console.log("Existing data:", data);
-  // const itemId = data.find((item: { Id: number, ProfileId : number}) => item.ProfileId === ProfileId)?.Id;
-  const matchingIds = data.filter((item: { ID: React.Key }) => item.ID === ID)
-    .map((item: { Id: number }) => item.Id);
-
-  const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
-
-  console.log(itemId);
-  console.log("Item ID for update:", itemId);
-
-  if (itemId) {
-    await sp.web.lists.getByTitle("List1").items.getById(itemId).update({
-      'Title': Title,
-      'LookupJobId': parseInt(selectedKey),
-      
-    });
-
-    // Clear form fields after update
-    this.setState({
-      Title: '',
-      LookupJob: '',
-    });
-
-    // Refresh the list data
-    await this.getAll();
-    alert('Edited Succesfully');
-  } else {
-    console.error("Item ID not found for update.");
-    alert('Something went Wrong');
   }
-};
+
+  handleEdit = async (item: any, LookupJobId: number) => {
+    // Populate form fields with the selected item's details
+    this.setState({
+      ID: item.ID,
+      Title: item.Title,
+      LookupJob: item.LookupJob,
+    });
+  };
+
+  handleUpdate = async (selectedKey: string): Promise<void> => {
+    const { ID, Title, data } = this.state;
+    const sp = spfi().using(SPFx(this.props.context));
+
+    // Logging to check if itemId is retrieved correctlya
+    console.log("Existing data:", data);
+    // const itemId = data.find((item: { Id: number, ProfileId : number}) => item.ProfileId === ProfileId)?.Id;
+    const matchingIds = data.filter((item: { ID: React.Key }) => item.ID === ID)
+      .map((item: { Id: number }) => item.Id);
+
+    const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
+
+    console.log(itemId);
+    console.log("Item ID for update:", itemId);
+
+    if (itemId) {
+      await sp.web.lists.getByTitle("List1").items.getById(itemId).update({
+        'Title': Title,
+        'LookupJobId': parseInt(selectedKey),
+
+      });
+
+      // Clear form fields after update
+      this.setState({
+        Title: '',
+        LookupJob: '',
+      });
+
+      // Refresh the list data
+      await this.getAll();
+      alert('Edited Succesfully');
+    } else {
+      console.error("Item ID not found for update.");
+      alert('Something went Wrong');
+    }
+  };
 
 
 
- public render(): React.ReactElement<IWebpart4Props> {
-  return (
-    <>
-            <div>
-            <DetailsList
-              items={this.state.data}
-              columns={this.state.columns}
-              selectionMode={SelectionMode.none}
-              getKey={(item) => item.Id} // Assuming there's a unique identifier property like Id
-            />
-            </div>
-      <div>
-        <TextField label="Title" name="Title" onChange={this.handleChange} value={this.state.Title} />
-        {/* Render ComboBox for LookupJob  */}
-        <ComboBox
-          label="LookupJob"
-          options={this.state.lookupOptions}
-          selectedKey={this.state.LookupJob}
-          onChange={this.handleChangeLookup}
-          data-name="LookupJob" // Add the name property here
-        />
-        <DefaultButton  text="Submit" onClick={() => this.handleSubmit(this.state.LookupJob)} />
-        {/* <DefaultButton text="Submit" onClick={() => (this.handleSubmit)} allowDisabledFocus /> */}
-        <DefaultButton text="Update" onClick={() => this.handleUpdate(this.state.LookupJob)} allowDisabledFocus />
-      </div>
-    </>
-  );
-}
+  public render(): React.ReactElement<IWebpart4Props> {
+    return (
+      <>
+        <div>
+          <DetailsList
+            items={this.state.data}
+            columns={this.state.columns}
+            selectionMode={SelectionMode.none}
+            getKey={(item) => item.Id} // Assuming there's a unique identifier property like Id
+          />
+        </div>
+        <div>
+          <TextField label="Title" name="Title" onChange={this.handleChange} value={this.state.Title} />
+          {/* Render ComboBox for LookupJob  */}
+          <ComboBox
+            label="LookupJob"
+            options={this.state.lookupOptions}
+            selectedKey={this.state.LookupJob}
+            onChange={this.handleChangeLookup}
+            data-name="LookupJob" // Add the name property here
+          />
+          <DefaultButton text="Submit" onClick={() => this.handleSubmit(this.state.LookupJob)} />
+          {/* <DefaultButton text="Submit" onClick={() => (this.handleSubmit)} allowDisabledFocus /> */}
+          <DefaultButton text="Update" onClick={() => this.handleUpdate(this.state.LookupJob)} allowDisabledFocus />
+        </div>
+      </>
+    );
+  }
 
 }
