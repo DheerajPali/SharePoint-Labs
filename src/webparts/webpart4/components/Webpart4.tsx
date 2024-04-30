@@ -190,10 +190,13 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
 
   handleEdit = async (item: any, LookupJobId: number) => {
     // Populate form fields with the selected item's details
+    console.log("item.LookupJob",item.LookupJob);
+    console.log("item",item);
+    const selectedLookupJob = item.LookupJob?.ProfileJob;
     this.setState({
       ID: item.ID,
       Title: item.Title,
-      LookupJob: item.LookupJob,
+      LookupJob: selectedLookupJob,
     });
   };
 
@@ -257,6 +260,8 @@ export default class Webpart4 extends React.Component<IWebpart4Props, IWebpart4S
             onChange={this.handleChangeLookup}
             data-name="LookupJob" // Add the name property here
           />
+
+
           <DefaultButton text="Submit" onClick={() => this.handleSubmit(this.state.LookupJob)} />
           {/* <DefaultButton text="Submit" onClick={() => (this.handleSubmit)} allowDisabledFocus /> */}
           <DefaultButton text="Update" onClick={() => this.handleUpdate(this.state.LookupJob)} allowDisabledFocus />
