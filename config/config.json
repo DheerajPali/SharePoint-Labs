@@ -49,6 +49,22 @@
           "manifest": "./src/webparts/wepart6/Wepart6WebPart.manifest.json"
         }
       ]
+    },
+    "webpart-7-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart7/Webpart7WebPart.js",
+          "manifest": "./src/webparts/webpart7/Webpart7WebPart.manifest.json"
+        }
+      ]
+    },
+    "webpart-8-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart8/Webpart8WebPart.js",
+          "manifest": "./src/webparts/webpart8/Webpart8WebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -59,6 +75,8 @@
     "Webpart4WebPartStrings": "lib/webparts/webpart4/loc/{locale}.js",
     "Webpart5WebPartStrings": "lib/webparts/webpart5/loc/{locale}.js",
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
-    "Wepart6WebPartStrings": "lib/webparts/wepart6/loc/{locale}.js"
+    "Wepart6WebPartStrings": "lib/webparts/wepart6/loc/{locale}.js",
+    "Webpart7WebPartStrings": "lib/webparts/webpart7/loc/{locale}.js",
+    "Webpart8WebPartStrings": "lib/webparts/webpart8/loc/{locale}.js"
   }
 }

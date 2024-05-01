@@ -1,9 +1,11 @@
 export interface IWebpart6State{
+    ID : React.Key,
     Title : string,
-    // userEMail : string,
-    // userTitle : string,
-    // MyLookup : string,
+    MyLookup : string,
+    User : any,
+    userEMail : string,
+    userTitle : string,
     data : [],
-    // lookupOptions : []
-    // User : []
+    columns: any,
+    lookupOptions : any[]
 }
