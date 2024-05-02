@@ -12,7 +12,7 @@
     "test": "gulp test"
   },
   "dependencies": {
-    "@fluentui/react": "^8.106.4",
+    "@fluentui/react": "^8.117.8",
     "@microsoft/sp-component-base": "1.18.2",
     "@microsoft/sp-core-library": "1.18.2",
     "@microsoft/sp-lodash-subset": "1.18.2",
@@ -24,7 +24,7 @@
     "@pnp/logging": "^4.0.1",
     "@pnp/odata": "^2.15.0",
     "@pnp/sp": "^3.24.0",
-    "@pnp/spfx-controls-react": "^3.17.0",
+    "@pnp/spfx-controls-react": "3.17.0",
     "office-ui-fabric-react": "^7.204.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",

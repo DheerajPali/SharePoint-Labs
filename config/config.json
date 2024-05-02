@@ -65,6 +65,22 @@
           "manifest": "./src/webparts/webpart8/Webpart8WebPart.manifest.json"
         }
       ]
+    },
+    "form-webpart-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/formWebpart/FormWebpartWebPart.js",
+          "manifest": "./src/webparts/formWebpart/FormWebpartWebPart.manifest.json"
+        }
+      ]
+    },
+    "webpart-9-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart9/Webpart9WebPart.js",
+          "manifest": "./src/webparts/webpart9/Webpart9WebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -77,6 +93,8 @@
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
     "Wepart6WebPartStrings": "lib/webparts/wepart6/loc/{locale}.js",
     "Webpart7WebPartStrings": "lib/webparts/webpart7/loc/{locale}.js",
-    "Webpart8WebPartStrings": "lib/webparts/webpart8/loc/{locale}.js"
+    "Webpart8WebPartStrings": "lib/webparts/webpart8/loc/{locale}.js",
+    "FormWebpartWebPartStrings": "lib/webparts/formWebpart/loc/{locale}.js",
+    "Webpart9WebPartStrings": "lib/webparts/webpart9/loc/{locale}.js"
   }
 }
