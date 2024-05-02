@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IFormWebpartProps } from './IFormWebpartProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { escape, times } from '@microsoft/sp-lodash-subset';
 // import styles from './FormWebpart.module.scss';
 
 import { DatePicker, Dropdown, IDropdown, Icon, Label, PrimaryButton, TextField, Toggle } from 'office-ui-fabric-react';
@@ -22,6 +22,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
       // Date : '',
       ParentID : '',
       Comments:'',
+      Status: '',
       data : [
         1,
       ],
@@ -46,10 +47,11 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
   }
   public handleSubmit = async (selectedKey: string): Promise<void> => {
     try {
-        const{ItemName,ParentID,Comments} = this.state as {
+        const{ItemName,ParentID,Comments,Status} = this.state as {
           ItemName: string,
           ParentID: string,
           Comments : string,
+          Status : string,
           // Date:string,
         };
         const sp:any = spfi().using(SPFx(this.props.context));
@@ -59,6 +61,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
           // Date : Date,
           'ParentIDId' : parseInt(selectedKey),
           'Comments':Comments,
+          'Status': Status,
           // 'Date':Date.toString(),
         })}
         this.setState({ ItemName: '', Comments: '',ParentID: ''});
@@ -104,6 +107,29 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
     } else {
       this.setState({ ParentID: '' });
     }
+  }
+
+  public handleDraft = () =>{
+   this.state =({
+    Status : 'Draft',
+    ParentID : this.state.ParentID,
+    ItemName : this.state.ItemName,
+    Comments : this.state.Comments,
+    data : this.state.data,
+    options : this.state.options,
+   })
+    this.handleSubmit(this.state.ParentID);
+  }
+  public handleSubmit1 = () =>{
+   this.state =({
+    Status : 'Submit',
+    ParentID : this.state.ParentID,
+    ItemName : this.state.ItemName,
+    Comments : this.state.Comments,
+    data : this.state.data,
+    options : this.state.options,
+   })
+    this.handleSubmit(this.state.ParentID);
   }
   // handleDateChange = (date:any) => {
   //   // Update the Date state with the selected date
@@ -284,7 +310,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
                       rows={2} // Set the number of visible rows
                       value={this.state.Comments}
                       // onChange={handleChange}
-                      data-name='Comments'
+                      // data-name='Comments'
                       onChange={this.handleChange}
                       name="Comments"
                   />
@@ -293,8 +319,8 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
            ))} 
         </tbody>
 
-        <DefaultButton style={{width:"20%"}} text='Save As Draft'onClick={() => this.handleSubmit(this.state.ParentID)} />
-        <PrimaryButton style={{width:"20%",backgroundColor:'gray'}} text='Submit' onClick={() => this.handleSubmit(this.state.ParentID)} />
+        <DefaultButton style={{width:"20%"}} text='Save As Draft'onClick={this.handleDraft} />
+        <PrimaryButton style={{width:"20%",backgroundColor:'gray'}} text='Submit' onClick={this.handleSubmit1} />
         <PrimaryButton style={{width:"20%",backgroundColor:'blue'}} text='Cancel' onClick={()=>{
           this.setState({
             ItemName : '',

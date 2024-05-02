@@ -3,6 +3,7 @@ export interface IFormWebpartState{
     Comments : string,
     ParentID : string,
     // Date : string,
+    Status : string,
     data : any,
     options : any,
 }

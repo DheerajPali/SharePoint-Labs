@@ -3,4 +3,5 @@ export interface IFormWebpartAdd{
     ParentID : string,
     Comments:string,
     // Date : string,
+    Status : string,
 }
