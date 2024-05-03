@@ -17,11 +17,11 @@ export interface IWebpart7State {
     BasicValue: number;
     // ApproverEMail: string,
     // ApproverTitle : string,
-    Approver: string;
+    // Approver: string;
     // IsApproved: boolean;
-    // Country: string;
+    Country: string;
     columns: any;
-    // CountryOptions: [];
+    CountryOptions: [];
     data1: [];
   }
   

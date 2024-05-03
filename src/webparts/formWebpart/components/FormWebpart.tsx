@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { IFormWebpartProps } from './IFormWebpartProps';
-import { DefaultButton, PrimaryButton, TextField, Dropdown, DatePicker, Label, Toggle } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, TextField, Dropdown, DatePicker, Label, Toggle, IChoiceGroupOption, IDropdownOption } from 'office-ui-fabric-react';
 import { spfi, SPFx } from '@pnp/sp';
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import "@pnp/sp/items/get-all";
+import "@pnp/sp/fields";
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import { IWebpart7Add } from './IFormWebpartAdd';
 
@@ -41,6 +42,16 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
   public componentDidMount = async () => {
     await this.loadOptions();
+    await this.fetchChoiceOptions();
+  }
+
+  public async fetchChoiceOptions(): Promise<void> {
+    const sp: any = spfi().using(SPFx(this.props.context));
+    const fieldSchema = await sp.web.lists.getByTitle("InvoiceDetails").fields.getByInternalNameOrTitle("Country")();
+    console.log("fieldScema", fieldSchema);
+    if (fieldSchema && fieldSchema.Choices) {
+      this.setState({ CountryOptions: fieldSchema.Choices });
+    }
   }
 
   //this method is created to fetch all the available options using lookup from InvoiceDetails9(Parent list )
@@ -174,6 +185,20 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     } as unknown as Pick<IWebpart7Add, keyof IWebpart7Add>);
   }
 
+  // handleDropdownChange = (event: React.FormEvent<HTMLDivElement>, option: IDropdownOption | undefined, name: string) => {
+  //   if (option) {
+  //     // Update the state with the selected dropdown value
+  //     const { data } = this.state;
+  //     data[name] = option.text; // Assuming you want to update 'data.country' based on the dropdown selection
+  //     this.setState({ data });
+  //   }
+  // };
+  handleDropdownChange = (event: React.FormEvent<HTMLDivElement>, option?: { key: string | number }) => {
+    if (option) {
+      this.setState({ Country: option.key as string });
+    }
+  }
+
   private handlePeoplePickerChange = (selectedItems: any[]) => {
     if (selectedItems.length > 0) {
       this.setState({
@@ -187,7 +212,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   };
 
   handleAdd1 = async (): Promise<void> => {
-    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue,
+    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue,Country
       // IsApproved, Country
     } = this.state as {
       InvoiceNo: string;
@@ -198,7 +223,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       BasicValue: number;
       // Approver: string;
       // IsApproved: boolean;
-      // Country: string;
+      Country: string;
     }
     // console.log(selectedApprover.text);
     // console.log(selectedApprover.secondaryText);
@@ -219,10 +244,10 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         'BasicValue': BasicValue,
         // 'ApproverId': parseInt(userId),
         // 'IsApproved': IsApproved,
-        // 'Country': Country,
+        'Country': Country,
       });
       const addedItemId = list.data.Id;
-      this.setState({ InvoiceNo: Math.random().toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN});
+      this.setState({ InvoiceNo: Math.random().toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN ,Country : ''});
       // this.handleSubmit1(addedItemId);
       await this.handleSave(addedItemId);
       alert('Added Successfully');
@@ -295,12 +320,16 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
   public render(): React.ReactElement<IFormWebpartProps> {
     const { data } = this.state;
-    const customOptions = [
-      { key: 'option1', text: 'India' },
-      { key: 'option2', text: 'Australia' },
-      { key: 'option3', text: 'USA' }
-    ];
-
+    // const customOptions = [
+    //   { key: 'option1', text: 'India' },
+    //   { key: 'option2', text: 'Australia' },
+    //   { key: 'option3', text: 'USA' }
+    // ];
+    const options: IDropdownOption[] = this.state.CountryOptions.map((option: string) => ({
+      key: option,
+      text: option,
+      value: option,
+    }));
 
     return (
       <>
@@ -412,7 +441,9 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   </div>
                 </div>
                 {/* <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={this.dropdownChangedEventHandler} options={this.state.capexRegisterDetails.capexType} selectedKey={this.state.capexTypeId} disabled={this.state.isDisplayMode} errorMessage={this.state.validation.validationErrorCapexType} />             */}
-                <Dropdown placeholder="Select an option" id='dropDownCapexType' options={customOptions} label='Country' />
+    
+
+                <Dropdown placeholder="Select an option" id='dropDownCapexType'  onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={data.Country} />
               </div>
             </div>
           </div>
