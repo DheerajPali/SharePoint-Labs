@@ -7,3 +7,21 @@ export interface IFormWebpartState{
     data : any,
     options : any,
 }
+
+export interface IWebpart7State {
+    InvoiceNo: string;
+    CompanyName: string;
+    Invoicedetails: string;
+    CompanyCode: string;
+    InvoiceAmount: number;
+    BasicValue: number;
+    // ApproverEMail: string,
+    // ApproverTitle : string,
+    Approver: string;
+    // IsApproved: boolean;
+    // Country: string;
+    columns: any;
+    // CountryOptions: [];
+    data1: [];
+  }
+  

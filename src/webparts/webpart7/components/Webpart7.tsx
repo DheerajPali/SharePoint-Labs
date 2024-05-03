@@ -195,7 +195,7 @@ export default class Webpart7 extends React.Component<IWebpart7Props, IWebpart7S
             items={this.state.data}
             columns={this.state.columns}
             selectionMode={SelectionMode.none}
-            getKey={(item) => item.Id} // Assuming there's a unique identifier property like Id
+            getKey={(item) => item.Id} 
           />
       </>
     );

@@ -270,7 +270,6 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
     }
   };
 
-
   public render(): React.ReactElement<IWebpart5Props> {
     // const {Person} = this.state;
     return (
