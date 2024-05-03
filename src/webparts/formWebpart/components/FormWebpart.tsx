@@ -1,173 +1,134 @@
 import * as React from 'react';
 import { IFormWebpartProps } from './IFormWebpartProps';
-import { escape, times } from '@microsoft/sp-lodash-subset';
-// import styles from './FormWebpart.module.scss';
-
-import { DatePicker, Dropdown, IDropdown, Icon, Label, PrimaryButton, TextField, Toggle } from 'office-ui-fabric-react';
-import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
-import { IFormWebpartState } from './IFormWebpartState';
-import { SPFx, spfi } from '@pnp/sp';
+import { DefaultButton, PrimaryButton, TextField, Dropdown, DatePicker, Label, Toggle } from 'office-ui-fabric-react';
+import {spfi, SPFx } from '@pnp/sp';
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import "@pnp/sp/items/get-all";
-import { DefaultButton } from '@fluentui/react';
-import { IFormWebpartAdd } from './IFormWebpartAdd';
+import { PeoplePicker,PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 
-export default class FormWebpart extends React.Component<IFormWebpartProps, IFormWebpartState> {
+export default class FormWebpart extends React.Component<IFormWebpartProps, any> {
+  private spContext: any; // Declare a variable to hold SharePoint context
+
   constructor(props: IFormWebpartProps) {
-    super(props)
-    this.state = ({
-      ItemName : '',
-      // Date : '',
-      ParentID : '',
-      Comments:'',
+    super(props);
+    this.state = {
+      ItemName: '',
+      Comments: '',
+      ParentID: '',
       Status: '',
-      data : [
-        1,
+      data: [{ ItemName: '', ParentID: '', Comments: '' },
+      { ItemName: '', ParentID: '', Comments: '' }
       ],
-    options:[],      
-    })
+      options: [],
+    };
   }
 
-  public componentDidMount = async() => {
-      await this.Options();
-  }
-
-  public  handleAdd = async() =>{
-    try {
-      const abc:any[] = [...this.state.data,1]
-      this.setState({
-        data : abc,
-      })
-      // const sp: any = spfi().using(SPFx(this.props.context));
-    } catch (error) {
-      console.log("handleAdd ::",error );
-    }
-  }
-  public handleSubmit = async (selectedKey: string): Promise<void> => {
-    try {
-        const{ItemName,ParentID,Comments,Status} = this.state as {
-          ItemName: string,
-          ParentID: string,
-          Comments : string,
-          Status : string,
-          // Date:string,
-        };
-        const sp:any = spfi().using(SPFx(this.props.context));
-        if(selectedKey){
-        const listItem : any = await sp.web.lists.getByTitle("ChildList").items.add({
-          'ItemName' : ItemName,
-          // Date : Date,
-          'ParentIDId' : parseInt(selectedKey),
-          'Comments':Comments,
-          'Status': Status,
-          // 'Date':Date.toString(),
-        })}
-        this.setState({ ItemName: '', Comments: '',ParentID: ''});
-    
-    } catch (error) {
-      console.log("handlesubmit::error",error);
-    }
-    
-  }
-  
-  public Options = async() =>{
-    try {
-      const sp:any = spfi().using(SPFx(this.props.context));
-      const listItem : any[] = await sp.web.lists.getByTitle("InvoiceDetails").items.select("ID").getAll();
-
-      // const spList: any[] = await sp.web.lists.getByTitle("ProfileList").items.select('ID', 'ProfileJob').getAll();
-      let tempOptions: any[] = [];
-      console.log("listItem", listItem);
-
-      listItem.forEach((value: any) => {
-        tempOptions.push({ key: value.ID, text: value.ID.toString() });
-      });
-      console.log("tempOptions", tempOptions);
-      this.setState({ options: tempOptions });
-    } catch (error) {
-      console.log("Options::Error:",error);
-    }
-  }
-  
-  handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const name = event.target.name
-    const value = event.target.value
-
-    this.setState({
-      [name]: value,
-    } as Pick<IFormWebpartAdd, keyof IFormWebpartAdd>);
-  }
 
   
-  handleChangeLookup = (event: React.FormEvent<HTMLDivElement>, option?: { key: string | number }) => {
-    if (option) {
-      this.setState({ ParentID: option.key as string });
-    } else {
-      this.setState({ ParentID: '' });
+  public componentDidMount = async () => {
+    await this.loadOptions();
+  }
+
+  //this method is created to fetch all the available options using lookup from InvoiceDetails9(Parent list )
+  private loadOptions = async () => {
+    try {
+      const sp: any = spfi().using(SPFx(this.props.context));
+      const items = await sp.web.lists.getByTitle("InvoiceDetails").items.select("ID").getAll();
+      const options = items.map((item: any) => ({ key: item.ID, text: item.ID.toString() }));
+      this.setState({ options });
+    } catch (error) {
+      console.log('Error loading options:', error);
     }
   }
 
-  public handleDraft = () =>{
-   this.state =({
-    Status : 'Draft',
-    ParentID : this.state.ParentID,
-    ItemName : this.state.ItemName,
-    Comments : this.state.Comments,
-    data : this.state.data,
-    options : this.state.options,
-   })
-    this.handleSubmit(this.state.ParentID);
+  //this method is created to handle changes in text field, the value which is in textfield will be set here as state.
+  private handleChange = (index: number, fieldName: string, value: string) => {
+    const { data } = this.state;
+    data[index][fieldName] = value;
+    this.setState({ data });
   }
-  public handleSubmit1 = () =>{
-   this.state =({
-    Status : 'Submit',
-    ParentID : this.state.ParentID,
-    ItemName : this.state.ItemName,
-    Comments : this.state.Comments,
-    data : this.state.data,
-    options : this.state.options,
-   })
-    this.handleSubmit(this.state.ParentID);
-  }
-  // handleDateChange = (date:any) => {
-  //   // Update the Date state with the selected date
-  //   this.setState({
-  //     Date: date.toISOString().substring(0, 10) // Store date as YYYY-MM-DD string
-  //   });
+
+  // handleChangeLookup = (event: React.FormEvent<HTMLDivElement>, option?: { key: string | number }) => {
+  //   if (option) {
+  //     this.setState({ Lookup: option.key as string });
+  //   } else {
+  //     this.setState({ Lookup: '' });
+  //   }
   // }
 
 
-  // public handleAdd = () => {
-  //   const nextId = this.state.data.length + 1;
-  //   const newDataEntry = {
-  //     id: nextId,
-  //     ItemName: '',
-  //     Date: '',
-  //     ParentId: '',
-  //     Comments: ''
-  //   };
-  //   this.setState(prevState => ({
-  //     data: [...prevState.data, newDataEntry]
-  //   }));
-  // };
-  
+    //this method is created to handle changes in Lookup field, the value which is in lookupfield will be set here as state.
+  private handleChangeLookup = (index: number, fieldName: string, value: string) => {
+    const { data } = this.state;
+    data[index][fieldName] = value;
+    this.setState({ data });
+  }
 
+  //this method will add another blank row in your webpart
+  private handleAddRow = () => {
+    const { data } = this.state;
+    data.push({ ItemName: '', ParentID: '', Comments: '' });
+    this.setState({ data });
+  }
+
+  //this method will add your state data by fetching each record in your ChildList.
+  private handleSave = async () => {
+    const { data } = this.state;
+    try {
+      const sp: any = spfi().using(SPFx(this.props.context));
+      const list = sp.web.lists.getByTitle("ChildList");
+      for (const record of data) {
+        await list.items.add({
+          ItemName: record.ItemName,
+          ParentIDId: parseInt(record.ParentID),
+          Comments: record.Comments,
+          Status: this.state.Status,
+        });
+      }
+      // here we're clearing all the filled data after submission.
+      this.setState({
+        ItemName: '',
+        Comments: '',
+        ParentID: '',
+        Status: '',
+        data: [{ ItemName: '', ParentID: '', Comments: '' },
+        { ItemName: '', ParentID: '', Comments: '' }
+        ],
+      });
+    } catch (error) {
+      console.log('Error saving records:', error);
+    }
+  }
+
+  //This method will update status as Draft
+  public handleDraft = () =>{
+    this.state =({
+      ...this.state,
+     Status : 'Draft',
+    })
+     this.handleSave();
+   }
+
+   //This method will update status as Submit
+   public handleSubmit1 = () =>{
+    this.state =({
+      ...this.state,
+     Status : 'Submit',
+    })
+    this.handleSave();
+   }
+
+   
   public render(): React.ReactElement<IFormWebpartProps> {
+    const { data } = this.state;
     const customOptions = [
       { key: 'option1', text: 'India' },
       { key: 'option2', text: 'Australia' },
       { key: 'option3', text: 'USA' }
     ];
 
-  //   const [status, setStatus] = React.useState<string>("");
-
-  // const handleStatusChange = (newStatus: string) => {
-  //   setStatus(newStatus);
-  // };
-  // console.log(status);
-  // const { Date } = this.state;
     return (
       <>
         <div >
@@ -239,6 +200,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
                     >
                     </PeoplePicker>
                   </div>
+
                 </div>
                 <div >
                   <div >
@@ -257,81 +219,77 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
           </div>
         </div>
 
-        ----------------------------------------------------------------------------------------------------------------------------------
-        {/* This is Second Section */}
-        <PrimaryButton
-                            text="Add"
-                            allowDisabledFocus
-                            // onClick={this.state.data.add(1)}
-                            onClick={this.handleAdd}
-                            // iconProps={addPlus}
-                          />
-        <thead>
-          <tr>
-            <th style={{ width: '25%' }}>Date</th>
-            <th style={{ width: '20%' }}>ItemName</th>
-            <th style={{ width: '15%' }}>ParentId</th>
-            <th style={{ width: '25%' }}>Comment</th>
-          </tr>
-        </thead>
-        <tbody>
-          {this.state.data.map((item:any, index :React.Key) => (
-            <tr id={`add${index}`} key={index}>
-              <td>
-                {/* <DatePicker
-                  className="customDatePicker"
-                  value={this.state.Date.toString()}
-                // onSelectDate={this.dateChangeEventHandlerSupplierQuoteDetails(  idx )  }
-
-                // disabled={this.state.isDisplayMode}
-                /> */}
-                <DatePicker
-                  className="customDatePicker"
-                />
-              </td>
-              <td>
-                <TextField
-                  value={this.state.ItemName}
-                  onChange={this.handleChange}
-                // onChange={this.handleChange( idx )}
-                // disabled={this.state.isDisplayMode}
-                name="ItemName"
-                />
-              </td>
-              <td>
-                {/* <Dropdown placeholder="Select an option" id='dropDownCurrency' onChange={this.dropDownChangeEventHandlerSupplierQuoteDetails(idx)} options={item.currencyForVendor} selectedKey={item.currencyForVendorID} disabled={this.state.isDisplayMode} /> */}
-                <Dropdown placeholder="Select an option" options={this.state.options} selectedKey={this.state.ParentID}  onChange={this.handleChangeLookup} 
-                data-name="ParentID"/>
-
-              </td>
-              <td>
-                <TextField
-                      multiline
-                      rows={2} // Set the number of visible rows
-                      value={this.state.Comments}
-                      // onChange={handleChange}
-                      // data-name='Comments'
-                      onChange={this.handleChange}
-                      name="Comments"
-                  />
-              </td>
+        ---------------------------------------------------------------------------------------------------------------------------------
+        <PrimaryButton text="Add Row" onClick={this.handleAddRow} />
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>ItemName</th>
+              <th>ParentId</th>
+              <th>Comments</th>
             </tr>
-           ))} 
-        </tbody>
+          </thead>
+          <tbody>
+            {data.map((record: { ItemName: string; ParentID: string; Comments: string; }, index: number) => (
+              <tr key={index}>
+                <td>
+                  {/* <DatePicker
+                    onSelectDate={(date) => this.handleChange(index, 'date', date.toISOString())}
+                  /> */}
+                </td>
+                <td>
+                  <TextField
+                    value={record.ItemName}
+                    onChange={(ev, newValue) => this.handleChange(index, 'ItemName', newValue || '')}
+                    name={`ItemName_${index}`} // Unique name for ItemName field
+                  />
+                </td>
+                <td>
+                  {/* <Dropdown
+                    placeholder="Select an option"
+                    options={this.state.options}
+                    selectedKey={record.ParentID}
+                    onChange={(ev, option) => this.handleChange(index, 'ParentID', option?.key.toString() || '')}
+                    // onChange={(ev, option) => this.handleChange(index, 'ParentID',option)}
+                    data-name={`ParentID_${index}`} // Unique name for ParentID field
+                  /> */}
+                  <Dropdown
+                    placeholder="Select an option"
+                    options={this.state.options}
+                    selectedKey={record.ParentID.toString()} // Ensure ParentID is converted to string
+                    onChange={(ev, option) => this.handleChangeLookup(index, 'ParentID', option?.key.toString() || '')} // Convert option?.key to string
+                    data-name={`ParentID_${index}`} // Unique name for ParentID field
+                  />
+                </td>
+                <td>
+                  <TextField
+                    value={record.Comments}
+                    onChange={(ev, newValue) => this.handleChange(index, 'Comments', newValue || '')}
+                    multiline
+                    rows={2}
+                    name={`Comments_${index}`} // Unique name for Comments field
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-        <DefaultButton style={{width:"20%"}} text='Save As Draft'onClick={this.handleDraft} />
-        <PrimaryButton style={{width:"20%",backgroundColor:'gray'}} text='Submit' onClick={this.handleSubmit1} />
-        <PrimaryButton style={{width:"20%",backgroundColor:'blue'}} text='Cancel' onClick={()=>{
+     
+        <DefaultButton text="Save as Draft" onClick={this.handleDraft} />
+        <PrimaryButton text="Submit" onClick={this.handleSubmit1} />
+        <PrimaryButton style={{backgroundColor: 'blue'}} text="Cancel" onClick={()=>{
           this.setState({
             ItemName : '',
-            // Date : '',
-            ParentID : '',
+            Date : '',
+            ParentId : '',
             Comments:'',
-            data : [
-              1,
-            ],
+            data: [{ ItemName: '', ParentID: '', Comments: '' },
+            { ItemName: '', ParentID: '', Comments: '' }
+            ]
           })
-        }}/>
+        }} />
       </>
     );
   }
