@@ -16,7 +16,7 @@ export interface IWebpart7Add {
     // ApproverEMail: string,
     // ApproverTitle : string,
     // Approver: any;
-    // IsApproved: boolean;
+    IsApproved: boolean;
     Country: string;
     User : string,
     // columns: any;

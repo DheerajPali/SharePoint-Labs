@@ -15,12 +15,12 @@ export interface IWebpart7State {
     CompanyCode: string;
     InvoiceAmount: number;
     BasicValue: number;
-    User : string,
+    // User : string,
 
     // ApproverEMail: string,
     // ApproverTitle : string,
-    // Approver: string;
-    // IsApproved: boolean;
+    Approver: string;
+    IsApproved: boolean;
     Country: string;
     columns: any;
     CountryOptions: [];
