@@ -15,9 +15,10 @@ export interface IWebpart7Add {
     BasicValue: number;
     // ApproverEMail: string,
     // ApproverTitle : string,
-    Approver: any;
+    // Approver: any;
     // IsApproved: boolean;
     Country: string;
+    User : string,
     // columns: any;
     // CountryOptions: [];
     // data1: [];

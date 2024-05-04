@@ -33,6 +33,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       // ApproverEMail: '',
       // ApproverTitle: '',
       // Approver: '',
+      User : '',
       IsApproved: true,
       Country: '',
       CountryOptions: [],
@@ -139,7 +140,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       ...this.state,
       Status: 'Draft'
     }, () => {
-      this.handleAdd1(); // Call handleAdd1 after setting the status to 'Draft'
+      this.handleAdd1(this.state.User); // Call handleAdd1 after setting the status to 'Draft'
     });
   };
 
@@ -148,7 +149,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       ...this.state,
       Status: 'Submit'
     }, () => {
-      this.handleAdd1(); // Call handleAdd1 after setting the status to 'Submit'
+      this.handleAdd1(this.state.User); // Call handleAdd1 after setting the status to 'Submit'
     });
   };
 
@@ -199,20 +200,31 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     }
   }
 
+  // private handlePeoplePickerChange = (selectedItems: any[]) => {
+  //   if (selectedItems.length > 0) {
+  //     this.setState({
+  //       Approver: selectedItems[0], // Assuming you want to select only one person
+  //     });
+  //   } else {
+  //     this.setState({
+  //       Person: null,
+  //     });
+  //   }
+  // };
   private handlePeoplePickerChange = (selectedItems: any[]) => {
     if (selectedItems.length > 0) {
       this.setState({
-        Approver: selectedItems[0], // Assuming you want to select only one person
+        User: selectedItems[0], // Assuming you want to select only one person
       });
     } else {
       this.setState({
-        Person: null,
+        User: null,
       });
     }
   };
 
-  handleAdd1 = async (): Promise<void> => {
-    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue,Country
+  handleAdd1 = async (selectectedPerson: any): Promise<void> => {
+    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue,Country,User
       // IsApproved, Country
     } = this.state as {
       InvoiceNo: string;
@@ -221,6 +233,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       CompanyCode: string;
       InvoiceAmount: number;
       BasicValue: number;
+      User : string,
       // Approver: string;
       // IsApproved: boolean;
       Country: string;
@@ -232,9 +245,9 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     const sp: any = spfi().using(SPFx(this.props.context));
     // console.log(selectedPerson.text);
     // console.log(selectedPerson.secondaryText);
-    // const user = selectedPerson;
     // if (user) {
-    try {
+      try {
+      const user = selectectedPerson.id;
       const list = await sp.web.lists.getByTitle("InvoiceDetails").items.add({
         'InvoiceNo': InvoiceNo,
         'CompanyName': CompanyName,
@@ -245,9 +258,10 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         // 'ApproverId': parseInt(userId),
         // 'IsApproved': IsApproved,
         'Country': Country,
+        'UserId' : parseInt(user),
       });
       const addedItemId = list.data.Id;
-      this.setState({ InvoiceNo: Math.random().toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN ,Country : ''});
+      this.setState({ InvoiceNo: Math.random().toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN ,Country : '', User: ''});
       // this.handleSubmit1(addedItemId);
       await this.handleSave(addedItemId);
       alert('Added Successfully');
@@ -387,10 +401,23 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
                 <div >
                   <div>
-                    <label>Approver</label>
+                    <label>User</label>
                   </div>
                   <div >
-                    <PeoplePicker
+
+                  <PeoplePicker
+            context={this.props.context}
+            titleText="Select People"
+            personSelectionLimit={1}
+            showtooltip={true}
+            // Use defaultSelectedUsers to set initial selected users
+            defaultSelectedUsers={[this.state.User]}
+            onChange={this.handlePeoplePickerChange}
+            ensureUser={true}
+            principalTypes={[PrincipalType.User]}
+            resolveDelay={1000}
+          />
+                    {/* <PeoplePicker
                       context={this.props.context}
                       placeholder='Add approvers'
                       personSelectionLimit={1}
@@ -402,7 +429,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                       principalTypes={[PrincipalType.User]}
                       resolveDelay={1000}
                     >
-                    </PeoplePicker>
+                    </PeoplePicker> */}
                     {/* <PeoplePicker
                       context={this.props.context}
                       titleText="Select People"
@@ -448,7 +475,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             </div>
           </div>
         </div>
-        {/* <DefaultButton text='save' onClick={() => this.handleAdd1(this.state.Approver)} /> */}
+         <DefaultButton text='save' onClick={() => this.handleAdd1(this.state.User)} /> 
 
         ---------------------------------------------------------------------------------------------------------------------------------
         <PrimaryButton text="Add Row" onClick={this.handleAddRow} />

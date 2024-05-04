@@ -15,6 +15,8 @@ export interface IWebpart7State {
     CompanyCode: string;
     InvoiceAmount: number;
     BasicValue: number;
+    User : string,
+
     // ApproverEMail: string,
     // ApproverTitle : string,
     // Approver: string;
