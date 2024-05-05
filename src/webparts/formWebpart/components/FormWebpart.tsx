@@ -93,17 +93,18 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   }
 
   //this method will add your state data by fetching each record in your ChildList.
-  private handleSave = async (itemId: any) => {
+  private handleSave = async (itemId: any, status: string) => {
     const { data } = this.state;
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
       const list = sp.web.lists.getByTitle("ChildList");
+      const statusValue = status.toString();
       for (const record of data) {
         await list.items.add({
           ItemName: record.ItemName,
           ParentIDId: parseInt(itemId),
           Comments: record.Comments,
-          Status: record.Status,
+          Status: statusValue,
         });
       }
       // here we're clearing all the filled data after submission.
@@ -123,23 +124,14 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
   //This method will update status as Draft
 
-
   public handleDraft = (): void => {
-    this.setState({
-      ...this.state,
-      Status: 'Draft'
-    }, () => {
-      this.handleAdd1(this.state.User); // Call handleAdd1 after setting the status to 'Draft'
-    });
+      const status = "Draft"
+      this.handleAdd(this.state.User,status); // Call handleAdd after setting the status to 'Draft'
   };
 
-  public handleSubmit1 = (): void => {
-    this.setState({
-      ...this.state,
-      Status: 'Submit'
-    }, () => {
-      this.handleAdd1(this.state.User); // Call handleAdd1 after setting the status to 'Submit'
-    });
+  public handleSubmit = (): void => {
+      const status = "Submit"
+      this.handleAdd(this.state.User,status); // Call handleAdd after setting the status to 'Submit'
   };
 
   private handleDeleteRow = (index: number) => {
@@ -179,7 +171,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     this.setState({ IsApproved: checked });
   };
 
-  handleAdd1 = async (selectectedPerson: any): Promise<void> => {
+  handleAdd = async (selectectedPerson: any , status : string): Promise<void> => {
     const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue, Country,
       User, IsApproved
     } = this.state as {
@@ -210,8 +202,9 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       });
       const addedItemId = list.data.Id;
       this.setState({ InvoiceNo: Math.floor(Math.random() * 10000000).toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN, Country: '', User: '', IsApproved: false });
-      // this.handleSubmit1(addedItemId);
-      await this.handleSave(addedItemId);
+      // this.handleSubmit(addedItemId);
+      const statusValue = status.toString();
+      await this.handleSave(addedItemId ,statusValue);
       alert('Added Successfully');
     } catch (error) {
       console.error('Error adding item:', error);
@@ -378,9 +371,9 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
           </tbody>
         </table>
 
-        <DefaultButton text='save' onClick={this.handleSave} />
+        {/* <DefaultButton text='save' onClick={this.handleSave} /> */}
         <DefaultButton text="Save as Draft" onClick={this.handleDraft} />
-        <PrimaryButton text="Submit" onClick={this.handleSubmit1} />
+        <PrimaryButton text="Submit" onClick={this.handleSubmit} />
         {/* <PrimaryButton text="Submit" onClick={this.handleSave} /> */}
         <PrimaryButton style={{ backgroundColor: 'blue' }} text="Cancel" onClick={() => {
           this.setState({
