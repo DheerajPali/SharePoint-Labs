@@ -53,11 +53,11 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
         minWidth: 100,
         maxWidth: 150,
         isResizable: true,
-        onRender: (item) => {
-          return (
-            <DefaultButton text="Delete" onClick={() => { this.handleDelete(item.ID) }} />
-          );
-        }
+        // onRender: (item) => {
+        //   return (
+        //     <DefaultButton text="Delete" onClick={() => { this.handleDelete(item.ID) }} />
+        //   );
+        // }
       },
       {
         key: 'column4',
@@ -66,11 +66,11 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
         minWidth: 100,
         maxWidth: 150,
         isResizable: true,
-        onRender: (item) => {
-          return (
-            <DefaultButton text="Edit" onClick={() => { this.handleEdit(item) }} />
-          );
-        }
+        // onRender: (item) => {
+        //   return (
+        //     <DefaultButton text="Edit" onClick={() => { this.handleEdit(item) }} />
+        //   );
+        // }
       }
     ];
     super(props);
@@ -88,39 +88,39 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
 
   public async componentDidMount() {
     try {
-      await this.getAll();
+      // await this.getAll();
     } catch (error) {
       console.log("error in getAll method ", error);
     }
   }
 
-  public getAll = async () => {
-    const sp: any = spfi().using(SPFx(this.props.context));
-    const listData = await sp.web.lists.getByTitle("List2").items.select("ID", "Title", "Person/EMail", "Person/Title").expand("Person").getAll();
-    console.log("list", listData);
+  // public getAll = async () => {
+  //   const sp: any = spfi().using(SPFx(this.props.context));
+  //   const listData = await sp.web.lists.getByTitle("List2").items.select("ID", "Title", "Person/EMail", "Person/Title").expand("Person").getAll();
+  //   console.log("list", listData);
 
-    const personEMail = listData.map((item: any) => item.Person != undefined ? item.Person.EMail : null);
-    const personTitle = listData.map((item: any) => item.Person != undefined ? item.Person.Title : null);
-    const Title = listData.map((item: any) => item.Person != undefined ? item.Title : null);
-    console.log("personEMail", personEMail);
-    console.log("personTitle", personTitle);
-    console.log("Title", Title);
+  //   const personEMail = listData.map((item: any) => item.Person != undefined ? item.Person.EMail : null);
+  //   const personTitle = listData.map((item: any) => item.Person != undefined ? item.Person.Title : null);
+  //   const Title = listData.map((item: any) => item.Person != undefined ? item.Title : null);
+  //   console.log("personEMail", personEMail);
+  //   console.log("personTitle", personTitle);
+  //   console.log("Title", Title);
 
 
-    const personData: any = listData.map((item: any, index: string | number) => {
-      return {
-        ...item,
-        userTitle: personTitle[index],
-        userEMail: personEMail[index],
-        Title: Title[index],
-      };
-    });
-    console.log("personData", personData);
+  //   const personData: any = listData.map((item: any, index: string | number) => {
+  //     return {
+  //       ...item,
+  //       userTitle: personTitle[index],
+  //       userEMail: personEMail[index],
+  //       Title: Title[index],
+  //     };
+  //   });
+  //   console.log("personData", personData);
 
-    this.setState({
-      data: personData,
-    })
-  }
+  //   this.setState({
+  //     data: personData,
+  //   })
+  // }
 
 
   // handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -166,123 +166,165 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
   //   }
   // };
 
-  handleDelete = async (Id: React.Key) => {
-    try {
-      console.log("Deleting item with ID:", Id);
-      const sp: any = spfi().using(SPFx(this.props.context));
-      const list = sp.web.lists.getByTitle("List2");
-      await list.items.getById(Id).delete();
-      console.log("Item deleted successfully");
-      await this.getAll(); // Refresh the data after deletion
-      alert('Item deleted successfully');
-    } catch (error) {
-      console.error("Error in delete", error);
-      alert('Error occurred while deleting item.');
-    }
-  }
+  // handleDelete = async (Id: React.Key) => {
+  //   try {
+  //     console.log("Deleting item with ID:", Id);
+  //     const sp: any = spfi().using(SPFx(this.props.context));
+  //     const list = sp.web.lists.getByTitle("List2");
+  //     await list.items.getById(Id).delete();
+  //     console.log("Item deleted successfully");
+  //     await this.getAll(); // Refresh the data after deletion
+  //     alert('Item deleted successfully');
+  //   } catch (error) {
+  //     console.error("Error in delete", error);
+  //     alert('Error occurred while deleting item.');
+  //   }
+  // }
 
-  public handleEdit = async (item: { Title: string, userEMail: string, userTitle: string, Person: [], ID: number }) => {
-    try {
-      this.setState({
-        Title: item.Title,
-        Person: item.Person,
-        ID: item.ID,
-      });
-    } catch (error) {
-      console.log("Error in handleEdit", error);
-    }
-  }
+  // public handleEdit = async (item: { Title: string, userEMail: string, userTitle: string, Person: [], ID: number }) => {
+  //   try {
+  //     this.setState({
+  //       Title: item.Title,
+  //       Person: item.Person,
+  //       ID: item.ID,
+  //     });
+  //   } catch (error) {
+  //     console.log("Error in handleEdit", error);
+  //   }
+  // }
 
-  handleUpdate = async (selectedPerson: any): Promise<void> => {
-    const { ID, Title, data } = this.state;
+  // public handleUpdate = async (selectedPeople: any[]): Promise<void> => {
+  //   const { ID, Title } = this.state;
+  //   const sp = spfi().using(SPFx(this.props.context));
+
+  //   if (selectedPeople.length > 0) {
+  //     const updateTasks = selectedPeople.map(async (user) => {
+  //       const matchingIds = this.state.data.filter((item : any) => item.ID === ID).map((item:any) => item.Id);
+  //       const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
+
+  //       if (itemId) {
+  //         try {
+  //           await sp.web.lists.getByTitle("List2").items.getById(itemId).update({
+  //             'Title': Title,
+  //             'PersonId': user.id,
+  //           });
+  //         } catch (error) {
+  //           console.error('Error updating item:', error);
+  //           throw error;
+  //         }
+  //       }
+  //     });
+
+  //     try {
+  //       await Promise.all(updateTasks);
+  //       await this.getAll();
+  //       this.setState({ Title: '', Person: [] });
+  //       alert('Updated Successfully');
+  //     } catch (error) {
+  //       console.error('Error updating items:', error);
+  //       alert('Failed to update items. Please try again.');
+  //     }
+  //   } else {
+  //     alert('Please select at least one person.');
+  //   }
+  // };
+
+
+
+
+  // private handleSubmit = async (): Promise<void> => {
+  //   const { Title, Person } = this.state as {
+  //     Title: string,
+  //     Person: any,
+  //   };
+
+  //   if (Person.length > 0) {
+  //     try {
+  //       const sp: any = spfi().using(SPFx(this.props.context));
+  //       const list = sp.web.lists.getByTitle("List2");
+
+  //       // Create an array of promises to add items for each selected person
+  //       const addTasks = Person.map(async (user: { id: any; }) => {
+  //         // Assuming `user.id` represents a single user ID (not an array)
+  //         const personId = user.id; // Get the user ID
+
+  //         // Add a new item to the SharePoint list
+  //         await list.items.add({
+  //           Title: Title,
+  //           PersonId: personId, // Assign the user ID as a single value
+  //         });
+  //       });
+
+  //       // await Promise.all(addTasks);
+  //       this.setState({ Title: '', Person: [] }); // Clear form after successful addition
+  //       alert('Added Successfully');
+  //     } catch (error) {
+  //       console.error('Error adding items:', error);
+  //       alert('Failed to add items. Please try again.');
+  //     }
+  //   } else {
+  //     alert('Please select at least one person.');
+  //   }
+  // };
+  public onSubmit = () => {
+    const { Person,Title } = this.state;
     const sp = spfi().using(SPFx(this.props.context));
-
-    const matchingIds = data.filter((item: { ID: React.Key }) => item.ID === ID).map((item: { Id: number }) => item.Id);
-
-    const itemId = matchingIds.length > 0 ? matchingIds[0] : undefined;
-
-
-    const user = selectedPerson;
-    if (itemId) {
-      try {
-        const list = await sp.web.lists.getByTitle("List2").items.getById(itemId).update({
-          'Title': Title,
-          // 'Description': description,
-          'PersonId': user.id,
-        })
-
-        this.getAll();
-        this.setState({ Title: '', Person: '' });
-        alert('Updated Successfully');
-      } catch (error) {
-        console.error('Error adding item:', error);
-        alert('Failed to add item. Please try again.');
-      }
-    } else {
-      alert('Please fill all the fields');
-    }
-  };
+   
+    // Extracting user IDs from selectedPersons array
+    const personIds = Person.map((person: { id: any; }) => person.id);
+ 
+    sp.web.lists.getByTitle('List2').items.add({
+      'Title': Title, // Add more fields as needed
+    //   PersonId: { results: personIds } // Change 'PersonId' to your field's internal name
+     PersonId: personIds
+    })
+    .then(() => {
+      console.log('Item added successfully');
+    })
+    .catch(error => {
+      console.error('Error adding item: ', error);
+    });
+}
 
 
-
-
-  public handleSubmit = async (selectedPerson: any): Promise<void> => {
-    const { Title, Person } = this.state as {
-      Title: string,
-      Person: any,
-    }
-    // const sp: any = spfi().using(SPFx(this.props.context));
-
-    const sp: any = spfi().using(SPFx(this.props.context));
-    console.log(selectedPerson.text);
-    console.log(selectedPerson.secondaryText);
-    const user = selectedPerson;
-    if (user) {
-      try {
-        const list = await sp.web.lists.getByTitle("List2").items.add({
-          'Title': Title,
-          // 'Description': description,
-          'PersonId': user.id,
-          // 'LookupColumnId': lookColumnValue, // Add this line
-        });
-
-        await this.getAll();
-        this.setState({ Title: '', Person: '' });
-        alert('Added Successfully');
-      } catch (error) {
-        console.error('Error adding item:', error);
-        alert('Failed to add item. Please try again.');
-      }
-    } else {
-      alert('Please fill all the fields');
-    }
+  // private handlePeoplePickerChange = (selectedItems: any[]) => {
+  //   this.setState({
+  //     Person: selectedItems, // Store selected users in the state array
+  //   });
+  // };
+  // private handlePeoplePickerChange = (selectedItems: any[]) => {
+  //   this.setState({
+  //     Person: selectedItems // Store selected users in the state array
+  //   });
+  // };
+  public onPeoplePickerChange = (items:any) => {
+    this.setState({ Person: items });
   }
 
-  private handlePeoplePickerChange = (selectedItems: any[]) => {
-    if (selectedItems.length > 0) {
-      this.setState({
-        Person: selectedItems[0], // Assuming you want to select only one person
-      });
-    } else {
-      this.setState({
-        Person: null,
-      });
-    }
-  };
 
   public render(): React.ReactElement<IWebpart5Props> {
     // const {Person} = this.state;
     return (
       <>
-        <div>
-          <DetailsList
-            items={this.state.data}
-            columns={this.state.columns}
-            selectionMode={SelectionMode.none}
-            getKey={(item) => item.Id} // Assuming there's a unique identifier property like Id
-          />
+        {/* <DetailsList
+          items={this.state.data}
+          columns={this.state.columns}
+          selectionMode={SelectionMode.none}
+          getKey={(item) => item.Id}
+        /> */}
 
-        </div>
+        {/* Render selected users */}
+        {this.state.Person.length > 0 && (
+          <div>
+            <h3>Selected People:</h3>
+            <ul>
+              {this.state.Person.map((person: any) => (
+                <li key={person.id}>{person.text}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div>
 
           {/* {
@@ -298,7 +340,7 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
         } */}
           <TextField label="Letter" name="Title" onChange={this.handleChange} value={this.state.Title} />
 
-          <PeoplePicker
+          {/* <PeoplePicker
             context={this.props.context}
             titleText="Select People"
             personSelectionLimit={1}
@@ -309,9 +351,37 @@ export default class Webpart5 extends React.Component<IWebpart5Props, IWebpart5S
             ensureUser={true}
             principalTypes={[PrincipalType.User]}
             resolveDelay={1000}
-          />
-          <DefaultButton text='Submit' onClick={() => { this.handleSubmit(this.state.Person) }} />
-          <DefaultButton text='Update' onClick={() => { this.handleUpdate(this.state.Person) }} />
+          /> */}
+          {/* <PeoplePicker
+            context={this.props.context}
+            titleText="Select People"
+            personSelectionLimit={3} // Example: Set a limit for maximum selected users
+            showtooltip={true}
+            defaultSelectedUsers={[]}
+            onChange={this.handlePeoplePickerChange}
+            ensureUser={true}
+            principalTypes={[PrincipalType.User]}
+            resolveDelay={1000}
+          /> */}
+          <div>
+        <PeoplePicker
+          context={this.props.context}
+          titleText="Select People"
+          personSelectionLimit={3}
+          showtooltip={true}
+          // Use defaultSelectedUsers to set initial selected users
+          defaultSelectedUsers={[]}        
+          onChange={this.onPeoplePickerChange}
+          ensureUser={true}
+          principalTypes={[PrincipalType.User]}
+          resolveDelay={1000}
+        />
+        <button onClick={this.onSubmit}>Submit</button>
+      </div>
+
+
+          <DefaultButton text='Submit' onClick={this.onSubmit} />
+          {/* <DefaultButton text='Update' onClick={() => { this.handleUpdate(this.state.Person) }} /> */}
         </div>
       </>
     );

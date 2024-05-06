@@ -13,12 +13,7 @@ import { IWebpart7Add } from './IFormWebpartAdd';
 export default class FormWebpart extends React.Component<IFormWebpartProps, any> {
   constructor(props: IFormWebpartProps) {
     super(props);
-    const a = Math.random() * 1000
     this.state = {
-      Date: new Date(),
-      ItemName: '',
-      Comments: '',
-      ParentID: '',
       Status: '',
       data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
       { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
@@ -32,16 +27,15 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       CompanyCode: '',
       InvoiceAmount: NaN,
       BasicValue: NaN,
-      User: '',
+      Approver: [],
+      // User: '',
       IsApproved: false,
       Country: '',
       CountryOptions: [],
-      data1: [],
     };
   }
 
   public componentDidMount = async () => {
-    await this.loadOptions();
     await this.fetchChoiceOptions();
   }
 
@@ -54,23 +48,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     }
   }
 
-  //this method is created to fetch all the available options using lookup from InvoiceDetails9(Parent list )
-  private loadOptions = async () => {
-    try {
-      const sp: any = spfi().using(SPFx(this.props.context));
-      const items: any[] = await sp.web.lists.getByTitle("InvoiceDetails").items.select("ID").getAll();
-      let tempOptions: any[] = [];
-
-      items.forEach((item: any) => {
-        tempOptions.push({ key: item.ID, text: item.ID.toString() });
-      });
-      this.setState({
-        options: tempOptions,
-      })
-    } catch (error) {
-      console.log('Error loading options:', error);
-    }
-  }
 
   //this method is created to handle changes in text field, the value which is in textfield will be set here as state.
   private handleChange = (index: number, fieldName: string, value: string) => {
@@ -111,11 +88,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       }
       // here we're clearing all the filled data after submission.
       this.setState({
-        Date : new Date(),
-        ItemName: '',
-        Comments: '',
-        ParentID: '',
-        Status: '',
         data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
         { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
         ],
@@ -129,12 +101,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
   public handleDraft = (): void => {
     const status = "Draft"
-    this.handleAdd(this.state.User, status); // Call handleAdd after setting the status to 'Draft'
+    this.handleAdd(status); // Call handleAdd after setting the status to 'Draft'
   };
 
   public handleSubmit = (): void => {
     const status = "Submit"
-    this.handleAdd(this.state.User, status); // Call handleAdd after setting the status to 'Submit'
+    this.handleAdd(status); // Call handleAdd after setting the status to 'Submit'
   };
 
   private handleDeleteRow = (index: number) => {
@@ -158,17 +130,10 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     }
   }
 
-  private handlePeoplePickerChange = (selectedItems: any[]) => {
-    if (selectedItems.length > 0) {
-      this.setState({
-        User: selectedItems[0], // Assuming you want to select only one person
-      });
-    } else {
-      this.setState({
-        User: null,
-      });
-    }
-  };
+  public onPeoplePickerChange = (items: any[]) => {
+    this.setState({ Approver: items });
+  }
+
   public handleDateChange = (date: Date | null | undefined, index: number, field: string) => {
     if (date) {
       const newData = [...this.state.data];
@@ -181,9 +146,8 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     this.setState({ IsApproved: checked });
   };
 
-  handleAdd = async (selectectedPerson: any, status: string): Promise<void> => {
-    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue, Country,
-      User, IsApproved
+  handleAdd = async (status: string): Promise<void> => {
+    const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue, Country, IsApproved, Approver
     } = this.state as {
       InvoiceNo: string;
       CompanyName: string;
@@ -191,14 +155,17 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       CompanyCode: string;
       InvoiceAmount: number;
       BasicValue: number;
-      User: string,
       Country: string;
       IsApproved: boolean,
+      Approver: any,
     }
 
     const sp: any = spfi().using(SPFx(this.props.context));
+
+    const approverIds = Approver && Approver.map((person: { id: any; }) => person.id);
     try {
-      const user = selectectedPerson.id;
+      // const user = selectectedPerson.id;
+
       const list = await sp.web.lists.getByTitle("InvoiceDetails").items.add({
         'InvoiceNo': InvoiceNo,
         'CompanyName': CompanyName,
@@ -207,14 +174,14 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         'InvoiceAmount': InvoiceAmount,
         'BasicValue': BasicValue,
         'Country': Country,
-        'UserId': parseInt(user),
+        ApproverId: approverIds,
         'IsApproved': IsApproved
       });
       const addedItemId = list.data.Id;
       // this.handleSubmit(addedItemId);
       const statusValue = status.toString();
       await this.handleSave(addedItemId, statusValue);
-      this.setState({ InvoiceNo: Math.floor(Math.random() * 10000000).toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN, Country: '', User: '', IsApproved: false });
+      this.setState({ InvoiceNo: Math.floor(Math.random() * 10000000).toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN, Country: '', Approver: [], IsApproved: false });
       alert('Added Successfully');
     } catch (error) {
       console.error('Error adding item:', error);
@@ -239,11 +206,11 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
               <div >
                 <h5 > Invoice Details
                 </h5>
-                <div id='id_customform'>
+                <div >
                 </div>
                 <div >
                   <div >
-                    <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1} />
+                    <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1}  />
                   </div>
                 </div>
                 <div >
@@ -253,9 +220,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                 </div>
                 <div >
                   <div >
-                    {/* <TextField label="Invoice details" name="Invoicedetails"   /> */}
-                    {/* <label>Invoice Details</label> */}
-                    {/* <textarea name="Invoicedetails" /> */}
                     <TextField
                       label="Invoice Details"
                       multiline
@@ -291,12 +255,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   <div >
                     <PeoplePicker
                       context={this.props.context}
-                      titleText="Approver"
+                      titleText="Select People"
                       personSelectionLimit={3}
                       showtooltip={true}
                       // Use defaultSelectedUsers to set initial selected users
-                      defaultSelectedUsers={[this.state.User]}
-                      onChange={this.handlePeoplePickerChange}
+                      defaultSelectedUsers={[this.state.Approver]}
+                      onChange={this.onPeoplePickerChange}
                       ensureUser={true}
                       principalTypes={[PrincipalType.User]}
                       resolveDelay={1000}
@@ -305,25 +269,17 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                 </div>
                 <div >
                   <div >
-
-                    {/* <Toggle id='toggleForImplication' defaultChecked={false} onText="Yes" offText="No" onChange={this.toggleChangeHandler} checked={this.state.capexRegisterDetails.isImplication} disabled={this.state.isDisplayMode} /> */}
-
-                    {/* <Label className='customLabel'>Is Approved</Label> */}
-                    {/* <Toggle id='toggleForImplication' defaultChecked={false} onText="Yes" offText="No" /> */}
-                    {/* <TextField label="Is Approved" name="IsApproved"   /> */}
                     <Toggle
                       label='IsApproved'
                       id='toggleForApproval'
-                      defaultChecked={this.state.IsApproved}
+                      checked={this.state.IsApproved}
                       onText="Yes"
                       offText="No"
                       onChanged={this.handleToggleChange}
                     />
                   </div>
                 </div>
-                {/* <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={this.dropdownChangedEventHandler} options={this.state.capexRegisterDetails.capexType} selectedKey={this.state.capexTypeId} disabled={this.state.isDisplayMode} errorMessage={this.state.validation.validationErrorCapexType} />             */}
-
-                <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={data.Country} />
+                <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={this.state.Country} />
               </div>
             </div>
           </div>
@@ -335,7 +291,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             <tr>
               <th>Date</th>
               <th>ItemName</th>
-              {/* <th>ParentId</th> */}
               <th>Comments</th>
               <th>Action</th>
             </tr>
@@ -344,9 +299,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; }, index: number) => (
               <tr key={index}>
                 <td>
-                  {/* <DatePicker
-                    onSelectDate={(date) => this.handleChange(index, 'date', date.toISOString())}
-                  /> */}
+
                   <DatePicker
                     value={record.Date}
                     onSelectDate={(date) => this.handleDateChange(date, index, 'Date')}
@@ -359,15 +312,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                     name={`ItemName_${index}`}
                   />
                 </td>
-                {/* <td>
-                  <Dropdown
-                    placeholder="Select an option"
-                    options={this.state.options}
-                    selectedKey={record.ParentID.toString()}
-                    onChange={(ev, option) => this.handleChangeLookup(index, 'ParentID', option?.key.toString() || '')}
-                    data-name={`ParentID_${index}`}
-                  />
-                </td> */}
                 <td>
                   <TextField
                     value={record.Comments}
@@ -389,27 +333,35 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         <DefaultButton text="Save as Draft" onClick={this.handleDraft} />
         <PrimaryButton text="Submit" onClick={this.handleSubmit} />
         {/* <PrimaryButton text="Submit" onClick={this.handleSave} /> */}
-        <PrimaryButton style={{ backgroundColor: 'blue' }} text="Cancel" onClick={() => {
-          this.setState({
-            ItemName: '',
-            Date: '',
-            ParentId: '',
-            Comments: '',
-            data: [{ ItemName: '', ParentID: '', Comments: '' },
-            { ItemName: '', ParentID: '', Comments: '' }
-            ],
 
-            InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
-            CompanyName: '',
-            Invoicedetails: '',
-            CompanyCode: '',
-            InvoiceAmount: NaN,
-            BasicValue: NaN,
-            Country: '',
-            User: '',
-            IsApproved: false,
-          })
-        }} />
+        <PrimaryButton
+          style={{ backgroundColor: 'blue' }}
+          text="Cancel"
+          onClick={() => {
+            console.log('State before cancel:', this.state);
+            this.setState(
+              {
+                InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
+                CompanyName: '',
+                Invoicedetails: '',
+                CompanyCode: '',
+                InvoiceAmount: NaN,
+                BasicValue: NaN,
+                Country: '',
+                Approver: [],
+                IsApproved: false,
+                data: [
+                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
+                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
+                ],
+              },
+              () => {
+                console.log('State after cancel:', this.state);
+              }
+            );
+          }}
+        />
+
       </>
     );
   }

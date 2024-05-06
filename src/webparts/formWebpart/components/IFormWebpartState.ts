@@ -19,7 +19,7 @@ export interface IWebpart7State {
 
     // ApproverEMail: string,
     // ApproverTitle : string,
-    Approver: string;
+    Approver: any;
     IsApproved: boolean;
     Country: string;
     columns: any;
