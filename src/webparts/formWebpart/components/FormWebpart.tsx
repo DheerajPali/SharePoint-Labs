@@ -15,12 +15,13 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     super(props);
     const a = Math.random() * 1000
     this.state = {
+      Date: new Date(),
       ItemName: '',
       Comments: '',
       ParentID: '',
       Status: '',
-      data: [{ ItemName: '', ParentID: '', Comments: '' },
-      { ItemName: '', ParentID: '', Comments: '' }
+      data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
+      { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
       ],
       options: [],
 
@@ -88,7 +89,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   //this method will add another blank row in your webpart
   private handleAddRow = () => {
     const { data } = this.state;
-    data.push({ ItemName: '', ParentID: '', Comments: '' });
+    data.push({ Date: new Date(), ItemName: '', ParentID: '', Comments: '' });
     this.setState({ data });
   }
 
@@ -101,6 +102,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       const statusValue = status.toString();
       for (const record of data) {
         await list.items.add({
+          Date: record.Date,
           ItemName: record.ItemName,
           ParentIDId: parseInt(itemId),
           Comments: record.Comments,
@@ -109,12 +111,13 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       }
       // here we're clearing all the filled data after submission.
       this.setState({
+        Date : new Date(),
         ItemName: '',
         Comments: '',
         ParentID: '',
         Status: '',
-        data: [{ ItemName: '', ParentID: '', Comments: '' },
-        { ItemName: '', ParentID: '', Comments: '' }
+        data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
+        { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
         ],
       });
     } catch (error) {
@@ -166,6 +169,13 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       });
     }
   };
+  public handleDateChange = (date: Date | null | undefined, index: number, field: string) => {
+    if (date) {
+      const newData = [...this.state.data];
+      newData[index][field] = date;
+      this.setState({ data: newData });
+    }
+  }
 
   private handleToggleChange = (checked: boolean) => {
     this.setState({ IsApproved: checked });
@@ -331,12 +341,16 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             </tr>
           </thead>
           <tbody>
-            {data.map((record: { ItemName: string; ParentID: string; Comments: string; }, index: number) => (
+            {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; }, index: number) => (
               <tr key={index}>
                 <td>
                   {/* <DatePicker
                     onSelectDate={(date) => this.handleChange(index, 'date', date.toISOString())}
                   /> */}
+                  <DatePicker
+                    value={record.Date}
+                    onSelectDate={(date) => this.handleDateChange(date, index, 'Date')}
+                  />
                 </td>
                 <td>
                   <TextField
@@ -394,7 +408,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             Country: '',
             User: '',
             IsApproved: false,
-        })
+          })
         }} />
       </>
     );
