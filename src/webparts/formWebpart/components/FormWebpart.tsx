@@ -125,13 +125,13 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   //This method will update status as Draft
 
   public handleDraft = (): void => {
-      const status = "Draft"
-      this.handleAdd(this.state.User,status); // Call handleAdd after setting the status to 'Draft'
+    const status = "Draft"
+    this.handleAdd(this.state.User, status); // Call handleAdd after setting the status to 'Draft'
   };
 
   public handleSubmit = (): void => {
-      const status = "Submit"
-      this.handleAdd(this.state.User,status); // Call handleAdd after setting the status to 'Submit'
+    const status = "Submit"
+    this.handleAdd(this.state.User, status); // Call handleAdd after setting the status to 'Submit'
   };
 
   private handleDeleteRow = (index: number) => {
@@ -171,7 +171,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     this.setState({ IsApproved: checked });
   };
 
-  handleAdd = async (selectectedPerson: any , status : string): Promise<void> => {
+  handleAdd = async (selectectedPerson: any, status: string): Promise<void> => {
     const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue, Country,
       User, IsApproved
     } = this.state as {
@@ -201,10 +201,10 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         'IsApproved': IsApproved
       });
       const addedItemId = list.data.Id;
-      this.setState({ InvoiceNo: Math.floor(Math.random() * 10000000).toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN, Country: '', User: '', IsApproved: false });
       // this.handleSubmit(addedItemId);
       const statusValue = status.toString();
-      await this.handleSave(addedItemId ,statusValue);
+      await this.handleSave(addedItemId, statusValue);
+      this.setState({ InvoiceNo: Math.floor(Math.random() * 10000000).toString(), CompanyName: '', Invoicedetails: '', CompanyCode: '', InvoiceAmount: NaN, BasicValue: NaN, Country: '', User: '', IsApproved: false });
       alert('Added Successfully');
     } catch (error) {
       console.error('Error adding item:', error);
@@ -383,8 +383,18 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             Comments: '',
             data: [{ ItemName: '', ParentID: '', Comments: '' },
             { ItemName: '', ParentID: '', Comments: '' }
-            ]
-          })
+            ],
+
+            InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
+            CompanyName: '',
+            Invoicedetails: '',
+            CompanyCode: '',
+            InvoiceAmount: NaN,
+            BasicValue: NaN,
+            Country: '',
+            User: '',
+            IsApproved: false,
+        })
         }} />
       </>
     );
