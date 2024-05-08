@@ -9,6 +9,7 @@ import "@pnp/sp/items/get-all";
 import "@pnp/sp/fields";
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import { IWebpart7Add } from './IFormWebpartAdd';
+import { Field } from '@pnp/sp/fields';
 
 export default class FormWebpart extends React.Component<IFormWebpartProps, any> {
   constructor(props: IFormWebpartProps) {
@@ -73,6 +74,47 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   //this method will add your state data by fetching each record in your ChildList.
   private handleSave = async (itemId: any, status: string) => {
     const { data } = this.state;
+
+
+    // const validationErrors: { [key: string]: string }[] = [];
+
+    // // Perform field-specific validation for each record in 'data'
+    // data.forEach((record: { Date: string | number | Date; ItemName: string; ParentID: string; Comments: string; }, index: any) => {
+    //   const errors: { [key: string]: string } = {};
+
+    //   // Validate Date (ensure it's not null or invalid)
+    //   if (!record.Date || isNaN(new Date(record.Date).getTime())) {
+    //     errors[`Date_${index}`] = 'Please enter a valid Date';
+    //   }
+
+    //   // Validate ItemName (ensure it's not empty)
+    //   if (!record.ItemName.trim()) {
+    //     errors[`ItemName_${index}`] = 'Please enter Item Name';
+    //   }
+
+    //   // Validate Comments (ensure it's not empty)
+    //   if (!record.Comments.trim()) {
+    //     errors[`Comments_${index}`] = 'Please enter Comments';
+    //   }
+
+    //   // Push errors for the current record to validationErrors array
+    //   if (Object.keys(errors).length > 0) {
+    //     validationErrors.push(errors);
+    //   }
+    // });
+
+    // // Check if there are any validation errors
+    // if (validationErrors.length > 0) {
+    //   // Display validation error messages for each field
+    //   // validationErrors.forEach(errors => {
+    //   //   // Object.keys(errors).forEach(fieldName => {
+    //   //   //   alert(errors[fieldName]); // Show error message for each field
+    //   //   // });
+    //   // });
+    //   alert('Please fill out other required fields')
+    //   return; // Stop further execution if there are validation errors
+    // }
+
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
       const list = sp.web.lists.getByTitle("ChildList");
@@ -159,9 +201,45 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
       IsApproved: boolean,
       Approver: any,
     }
+    const validationErrors: { [key: string]: string } = {};
+
+    if (!InvoiceNo) {
+      validationErrors.InvoiceNo = 'Please enter Invoice No';
+    }
+    if (!CompanyName) {
+      validationErrors.CompanyName = 'Please enter Company Name';
+    }
+    if (!Invoicedetails) {
+      validationErrors.Invoicedetails = 'Please enter Invoice Details';
+    }
+    if (!CompanyCode) {
+      validationErrors.CompanyCode = 'Please enter Company Code';
+    }
+    if (isNaN(InvoiceAmount) || InvoiceAmount <= 0) {
+      validationErrors.InvoiceAmount = 'Please enter a valid Invoice Amount';
+    }
+    if (isNaN(BasicValue) || BasicValue <= 0) {
+      validationErrors.BasicValue = 'Please enter a valid Basic Value';
+    }
+    if (!Country) {
+      validationErrors.Country = 'Please select a Country';
+    }
+    if (!Approver || Approver.length === 0) {
+      validationErrors.Approver = 'Please select at least one Approver';
+    }
+
+    // Check if there are any validation errors
+    if (Object.keys(validationErrors).length > 0) {
+      // // Display validation error messages for each field
+      // Object.keys(validationErrors).forEach(fieldName => {
+      //   alert(validationErrors[fieldName]); // Show error message for each field
+      // });
+      alert('Please fill all the mendatory fields.')
+      return; // Stop further execution if there are validation errors
+    }
+
 
     const sp: any = spfi().using(SPFx(this.props.context));
-
     const approverIds = Approver && Approver.map((person: { id: any; }) => person.id);
     try {
       // const user = selectectedPerson.id;
@@ -210,12 +288,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1}  />
+                    <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1} required />
                   </div>
                 </div>
                 <div >
                   <div >
-                    <TextField label="CompanyName" name="CompanyName" value={this.state.CompanyName} onChange={this.handleChange1} />
+                    <TextField label="CompanyName" name="CompanyName" value={this.state.CompanyName} onChange={this.handleChange1} required />
                   </div>
                 </div>
                 <div >
@@ -228,23 +306,24 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                       // onChange={handleChange}
                       name='Invoicedetails'
                       value={this.state.Invoicedetails} onChange={this.handleChange1}
+                      required
                     />
 
                   </div>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Company Code" name="CompanyCode" value={this.state.CompanyCode} onChange={this.handleChange1} />
+                    <TextField label="Company Code" name="CompanyCode" value={this.state.CompanyCode} onChange={this.handleChange1} required />
                   </div>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount} onChange={this.handleChange1} />
+                    <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount} onChange={this.handleChange1} required />
                   </div>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue} onChange={this.handleChange1} />
+                    <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue} onChange={this.handleChange1} required />
                   </div>
                 </div>
 
@@ -259,11 +338,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                       personSelectionLimit={3}
                       showtooltip={true}
                       // Use defaultSelectedUsers to set initial selected users
-                      defaultSelectedUsers={[this.state.Approver]}
+                      defaultSelectedUsers={this.state.Approver}
                       onChange={this.onPeoplePickerChange}
                       ensureUser={true}
                       principalTypes={[PrincipalType.User]}
                       resolveDelay={1000}
+                      required
                     />
                   </div>
                 </div>
@@ -279,7 +359,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                     />
                   </div>
                 </div>
-                <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={this.state.Country} />
+                <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={this.state.Country} required />
               </div>
             </div>
           </div>
@@ -303,6 +383,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   <DatePicker
                     value={record.Date}
                     onSelectDate={(date) => this.handleDateChange(date, index, 'Date')}
+                    isRequired
                   />
                 </td>
                 <td>
@@ -310,9 +391,11 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                     value={record.ItemName}
                     onChange={(ev, newValue) => this.handleChange(index, 'ItemName', newValue || '')}
                     name={`ItemName_${index}`}
+                    required
                   />
                 </td>
-                <td>
+                <td
+                style={{width : '40%'}}>
                   <TextField
                     value={record.Comments}
                     onChange={(ev, newValue) => this.handleChange(index, 'Comments', newValue || '')}
@@ -321,7 +404,8 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                     name={`Comments_${index}`}
                   />
                 </td>
-                <td>
+                <td
+                style={{width: '15%'}}>
                   <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
                 </td>
               </tr>
