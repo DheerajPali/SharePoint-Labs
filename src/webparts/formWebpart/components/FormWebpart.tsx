@@ -14,6 +14,7 @@ import { Field } from '@pnp/sp/fields';
 export default class FormWebpart extends React.Component<IFormWebpartProps, any> {
   constructor(props: IFormWebpartProps) {
     super(props);
+    //here we are setting default state.
     this.state = {
       Status: '',
       data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
@@ -40,6 +41,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     await this.fetchChoiceOptions();
   }
 
+  //this method is created to fetch the choice options inside a field. 
   public async fetchChoiceOptions(): Promise<void> {
     const sp: any = spfi().using(SPFx(this.props.context));
     const fieldSchema = await sp.web.lists.getByTitle("InvoiceDetails").fields.getByInternalNameOrTitle("Country")();
@@ -58,13 +60,14 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   }
 
   //this method is created to handle changes in Lookup field, the value which is in lookupfield will be set here as state.
+  //Now we're not using this method, because we're taking Id by default.
   private handleChangeLookup = (index: number, fieldName: string, value: string) => {
     const { data } = this.state;
     data[index][fieldName] = value;
     this.setState({ data });
   }
 
-  //this method will add another blank row in your webpart
+  //this method will add another blank row with given properties in your webpart
   private handleAddRow = () => {
     const { data } = this.state;
     data.push({ Date: new Date(), ItemName: '', ParentID: '', Comments: '' });
@@ -74,46 +77,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
   //this method will add your state data by fetching each record in your ChildList.
   private handleSave = async (itemId: any, status: string) => {
     const { data } = this.state;
-
-
-    // const validationErrors: { [key: string]: string }[] = [];
-
-    // // Perform field-specific validation for each record in 'data'
-    // data.forEach((record: { Date: string | number | Date; ItemName: string; ParentID: string; Comments: string; }, index: any) => {
-    //   const errors: { [key: string]: string } = {};
-
-    //   // Validate Date (ensure it's not null or invalid)
-    //   if (!record.Date || isNaN(new Date(record.Date).getTime())) {
-    //     errors[`Date_${index}`] = 'Please enter a valid Date';
-    //   }
-
-    //   // Validate ItemName (ensure it's not empty)
-    //   if (!record.ItemName.trim()) {
-    //     errors[`ItemName_${index}`] = 'Please enter Item Name';
-    //   }
-
-    //   // Validate Comments (ensure it's not empty)
-    //   if (!record.Comments.trim()) {
-    //     errors[`Comments_${index}`] = 'Please enter Comments';
-    //   }
-
-    //   // Push errors for the current record to validationErrors array
-    //   if (Object.keys(errors).length > 0) {
-    //     validationErrors.push(errors);
-    //   }
-    // });
-
-    // // Check if there are any validation errors
-    // if (validationErrors.length > 0) {
-    //   // Display validation error messages for each field
-    //   // validationErrors.forEach(errors => {
-    //   //   // Object.keys(errors).forEach(fieldName => {
-    //   //   //   alert(errors[fieldName]); // Show error message for each field
-    //   //   // });
-    //   // });
-    //   alert('Please fill out other required fields')
-    //   return; // Stop further execution if there are validation errors
-    // }
 
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
@@ -148,7 +111,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
 
   public handleSubmit = (): void => {
     const status = "Submit"
-    this.handleAdd(status); // Call handleAdd after setting the status to 'Submit'
+    this.handleAdd('Submit'); // Call handleAdd after setting the status to 'Submit'
   };
 
   private handleDeleteRow = (index: number) => {
@@ -376,6 +339,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
             </tr>
           </thead>
           <tbody>
+            {/* here we're creating a record for each index */}
             {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; }, index: number) => (
               <tr key={index}>
                 <td>
@@ -406,6 +370,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                 </td>
                 <td
                 style={{width: '15%'}}>
+                  {/* This button deletes single row */}
                   <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
                 </td>
               </tr>
@@ -413,10 +378,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
           </tbody>
         </table>
 
-        {/* <DefaultButton text='save' onClick={this.handleSave} /> */}
+
+        {/* Save as Draft button workflow --> handleDraft :: handleAdd(status) :: handleSave(addedItemId, statusValue) */}
         <DefaultButton text="Save as Draft" onClick={this.handleDraft} />
+
+         {/* Submit button workflow --> handleSubmit :: handleAdd(status) :: handleSave(addedItemId, statusValue) */}
         <PrimaryButton text="Submit" onClick={this.handleSubmit} />
-        {/* <PrimaryButton text="Submit" onClick={this.handleSave} /> */}
 
         <PrimaryButton
           style={{ backgroundColor: 'blue' }}
@@ -439,6 +406,8 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
                 ],
               },
+
+              //Here you can verify ,wether your state is empty after clicking on Cancel button or not. 
               () => {
                 console.log('State after cancel:', this.state);
               }

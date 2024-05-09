@@ -81,6 +81,22 @@
           "manifest": "./src/webparts/webpart9/Webpart9WebPart.manifest.json"
         }
       ]
+    },
+    "webpart-10-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart10/Webpart10WebPart.js",
+          "manifest": "./src/webparts/webpart10/Webpart10WebPart.manifest.json"
+        }
+      ]
+    },
+    "webpart-11-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/webpart11/Webpart11WebPart.js",
+          "manifest": "./src/webparts/webpart11/Webpart11WebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -95,6 +111,8 @@
     "Webpart7WebPartStrings": "lib/webparts/webpart7/loc/{locale}.js",
     "Webpart8WebPartStrings": "lib/webparts/webpart8/loc/{locale}.js",
     "FormWebpartWebPartStrings": "lib/webparts/formWebpart/loc/{locale}.js",
-    "Webpart9WebPartStrings": "lib/webparts/webpart9/loc/{locale}.js"
+    "Webpart9WebPartStrings": "lib/webparts/webpart9/loc/{locale}.js",
+    "Webpart10WebPartStrings": "lib/webparts/webpart10/loc/{locale}.js",
+    "Webpart11WebPartStrings": "lib/webparts/webpart11/loc/{locale}.js"
   }
 }
