@@ -8,20 +8,26 @@ import "@pnp/sp/items";
 import "@pnp/sp/items/get-all";
 import "@pnp/sp/fields";
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
-import { IWebpart7Add } from './IFormWebpartAdd';
+import { IFormWebpartAdd } from './IFormWebpartAdd';
 import { Field } from '@pnp/sp/fields';
+import { IFormWebpartState } from './IFormWebpartState';
+// import { IFormWebpartState, IWebpart7State } from './IFormWebpartState';
 
-export default class FormWebpart extends React.Component<IFormWebpartProps, any> {
+export default class FormWebpart extends React.Component<IFormWebpartProps,IFormWebpartState > {
   constructor(props: IFormWebpartProps) {
     super(props);
     //here we are setting default state.
     this.state = {
+      ItemName: '',
+      Comments: '',
+      ParentID: '',
+      Date: new Date(),
       Status: '',
       data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
       { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
       ],
       options: [],
-
+      Document: null,
 
       InvoiceNo: Math.floor(Math.random() * 1000000).toString(),
       CompanyName: '',
@@ -102,18 +108,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     }
   }
 
-  //This method will update status as Draft
-
-  public handleDraft = (): void => {
-    const status = "Draft"
-    this.handleAdd(status); // Call handleAdd after setting the status to 'Draft'
-  };
-
-  public handleSubmit = (): void => {
-    const status = "Submit"
-    this.handleAdd('Submit'); // Call handleAdd after setting the status to 'Submit'
-  };
-
   private handleDeleteRow = (index: number) => {
     const { data } = this.state;
     const newData = [...data.slice(0, index), ...data.slice(index + 1)];
@@ -125,7 +119,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
     const value = event.target.value
     this.setState({
       [name]: value,
-    } as unknown as Pick<IWebpart7Add, keyof IWebpart7Add>);
+    } as unknown as Pick<IFormWebpartAdd, keyof IFormWebpartAdd>);
   }
 
 
@@ -281,12 +275,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount} onChange={this.handleChange1} required />
+                    <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount.toString()} onChange={this.handleChange1} required />
                   </div>
                 </div>
                 <div >
                   <div >
-                    <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue} onChange={this.handleChange1} required />
+                    <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue.toString()} onChange={this.handleChange1} required />
                   </div>
                 </div>
 
@@ -359,7 +353,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   />
                 </td>
                 <td
-                style={{width : '40%'}}>
+                  style={{ width: '40%' }}>
                   <TextField
                     value={record.Comments}
                     onChange={(ev, newValue) => this.handleChange(index, 'Comments', newValue || '')}
@@ -369,7 +363,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
                   />
                 </td>
                 <td
-                style={{width: '15%'}}>
+                  style={{ width: '15%' }}>
                   {/* This button deletes single row */}
                   <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
                 </td>
@@ -379,11 +373,11 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, any>
         </table>
 
 
-        {/* Save as Draft button workflow --> handleDraft :: handleAdd(status) :: handleSave(addedItemId, statusValue) */}
-        <DefaultButton text="Save as Draft" onClick={this.handleDraft} />
+        {/* Save as Draft button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
+        <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
 
-         {/* Submit button workflow --> handleSubmit :: handleAdd(status) :: handleSave(addedItemId, statusValue) */}
-        <PrimaryButton text="Submit" onClick={this.handleSubmit} />
+        {/* Submit button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
+        <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
 
         <PrimaryButton
           style={{ backgroundColor: 'blue' }}

@@ -4,9 +4,9 @@ export interface IFormWebpartAdd{
     Comments:string,
     // Date : string,
     Status : string,
-}
+// }
 
-export interface IWebpart7Add {
+// export interface IWebpart7Add {
     InvoiceNo: string;
     CompanyName: string;
     Invoicedetails: string;
