@@ -2,18 +2,24 @@ import * as React from 'react';
 import { IFormWebpartProps } from './IFormWebpartProps';
 import { DefaultButton, PrimaryButton, TextField, Dropdown, DatePicker, Label, Toggle, IChoiceGroupOption, IDropdownOption } from 'office-ui-fabric-react';
 import { spfi, SPFx } from '@pnp/sp';
-import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import "@pnp/sp/items/get-all";
 import "@pnp/sp/fields";
+import "@pnp/sp/attachments"
+import "@pnp/sp/webs";
+import "@pnp/sp/folders/web";
+import { IFolder } from "@pnp/sp/folders";
+import "@pnp/sp/files";
+import "@pnp/sp/folders";
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import { IFormWebpartAdd } from './IFormWebpartAdd';
 import { Field } from '@pnp/sp/fields';
 import { IFormWebpartState } from './IFormWebpartState';
+import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react';
 // import { IFormWebpartState, IWebpart7State } from './IFormWebpartState';
 
-export default class FormWebpart extends React.Component<IFormWebpartProps,IFormWebpartState > {
+export default class FormWebpart extends React.Component<IFormWebpartProps, IFormWebpartState> {
   constructor(props: IFormWebpartProps) {
     super(props);
     //here we are setting default state.
@@ -23,11 +29,11 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
       ParentID: '',
       Date: new Date(),
       Status: '',
-      data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
-      { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
+      data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: [] },
+      { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: [] }
       ],
       options: [],
-      Document: null,
+      Document: [],
 
       InvoiceNo: Math.floor(Math.random() * 1000000).toString(),
       CompanyName: '',
@@ -40,6 +46,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
       IsApproved: false,
       Country: '',
       CountryOptions: [],
+      ItemID: '',
     };
   }
 
@@ -76,7 +83,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
   //this method will add another blank row with given properties in your webpart
   private handleAddRow = () => {
     const { data } = this.state;
-    data.push({ Date: new Date(), ItemName: '', ParentID: '', Comments: '' });
+    data.push({ Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: [] });
     this.setState({ data });
   }
 
@@ -89,15 +96,40 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
       const list = sp.web.lists.getByTitle("ChildList");
       const statusValue = status.toString();
       for (const record of data) {
-        await list.items.add({
+
+        const addedItem = await list.items.add({
           Date: record.Date,
           ItemName: record.ItemName,
           ParentIDId: parseInt(itemId),
           Comments: record.Comments,
-          Status: statusValue,
+          Status: statusValue
         });
+        const addedItemId = addedItem.data.Id;
+        this.setState({
+          ItemID: addedItemId.toString(),
+        })
+        // });
+        const docs = record.Document;
+        for (let i = 0; i < docs.length; i++) {
+          const { ItemID } = this.state as {
+            ItemID: string,
+          };
+
+          let fileContent = await docs[i].downloadFileContent();
+          const sp: any = spfi().using(SPFx(this.props.context));
+          let addedItem: any = await sp.web.getFolderByServerRelativePath('DocLibrary1').files.addUsingPath(docs[i].fileName, fileContent, { Overwrite: true });
+          let item = await addedItem.file.getItem();
+          // Set the lookup column value
+          await item.update({
+            'ItemIDId': Number(ItemID)
+
+          });
+          // let savefile: IFolder = await sp.web.getFolderByServerRelativePath('DocLibrary1').files.addUsingPath(docs[i].fileName, fileContent, { Overwrite: true });
+        }
+        this.setState({ Document: [] });
+        alert('File added successfully')
       }
-      // here we're clearing all the filled data after submission.
+
       this.setState({
         data: [{ Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
         { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
@@ -195,7 +227,6 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
       return; // Stop further execution if there are validation errors
     }
 
-
     const sp: any = spfi().using(SPFx(this.props.context));
     const approverIds = Approver && Approver.map((person: { id: any; }) => person.id);
     try {
@@ -222,7 +253,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
       console.error('Error adding item:', error);
       alert('Failed to add item. Please try again.');
     }
+  }
 
+  public getSelectedFile = async (result: any, index: number) => {
+    const newData = [...this.state.data];
+    newData[index].Document = result; // Store selected file in Document field
+    this.setState({ data: newData });
   }
 
   public render(): React.ReactElement<IFormWebpartProps> {
@@ -330,11 +366,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
               <th>ItemName</th>
               <th>Comments</th>
               <th>Action</th>
+              <th>File</th>
             </tr>
           </thead>
           <tbody>
             {/* here we're creating a record for each index */}
-            {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; }, index: number) => (
+            {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; Document: any }, index: number) => (
               <tr key={index}>
                 <td>
 
@@ -367,17 +404,31 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
                   {/* This button deletes single row */}
                   <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
                 </td>
+                <td>
+                  <FilePicker
+                    buttonLabel="Attachment"
+                    buttonIcon="Attach"
+                    onSave={(result) => this.getSelectedFile(result, index)}
+                    onChange={(result) => this.getSelectedFile(result, index)}
+                    context={this.props.context}
+                    hideLinkUploadTab={true}
+                    hideOneDriveTab={true}
+                    hideStockImages={true}
+                    hideLocalUploadTab={true}
+                    hideSiteFilesTab={true}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-
 
         {/* Save as Draft button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
         <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
 
         {/* Submit button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
         <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
+        {/* <DefaultButton text='test' onClick={() => this.handleSave(1, 'try')} /> */}
 
         <PrimaryButton
           style={{ backgroundColor: 'blue' }}
@@ -396,8 +447,8 @@ export default class FormWebpart extends React.Component<IFormWebpartProps,IForm
                 Approver: [],
                 IsApproved: false,
                 data: [
-                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '' },
-                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '' }
+                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null },
+                  { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null }
                 ],
               },
 

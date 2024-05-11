@@ -22,4 +22,5 @@ export interface IFormWebpartAdd{
     // columns: any;
     // CountryOptions: [];
     // data1: [];
+    ItemID : string
 }
