@@ -41,7 +41,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
         },
         Cell: ({ row }: any) => (
           <Box>
-            <DefaultButton onClick={() => this.handleEdit(row)} text='Edit' />
+            <DefaultButton onClick={() => this.handleEdit(row.original.Id)} text='Edit' />
           </Box>
         ),
         enableColumnFilter: false,
@@ -83,11 +83,27 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
         accessorKey: 'IsApproved',
         size: 120,
       },
-      {
-        header: 'Approver',
-        accessorKey: 'Approver',
-        size: 120,
-      },
+      // {
+      //   header: 'Approver',
+      //   accessorKey: 'Approver',
+      //   size: 120,
+      // },
+      // {
+      //   header: 'Approver',
+      //   accessorKey: 'Approver',
+      //   size: 110,
+      //   muiTableBodyCellProps: {
+      //     align: 'center',
+      //   },
+      //   Cell: ({ row }: any) => (
+      //     <Box>
+      //       <DefaultButton onClick={() => this.handleEdit(row.original.Approver[0].Title)} text='Edit' />
+      //     </Box>
+      //   ),
+      //   enableColumnFilter: false,
+      //   enableSorting: false,
+      //   enableGrouping: false,
+      // },
     ];
     //here we are setting default state.
     this.state = {
@@ -117,6 +133,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
       isEditable: false,
       colData: null,
       columns: headerColumn,
+      editID: NaN,
     };
   }
 
@@ -126,25 +143,30 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
     // Here we're getting our parameter "itemID" using queryString. 
     let itemID = this.getParameterByName("itemID", window.location.href);
     if (itemID) {
+      this.setState({
+        editID: Number(itemID),
+      })
       await this.editForm(Number(itemID));
     }
     await this.getAll();
   }
 
-public handleEdit = (row: any) => {
+  public handleEdit = (id: number) => {
     // Extract the item ID from the row data
     // const ActivityId = row.original.id;
-    const itemID = 106;
-
+    const itemID = id;
+    this.setState({
+      editID: id,
+    })
     // Extract the current site URL
     // const siteUrl = this.props.context.pageContext.web.absoluteUrl;
 
     // Construct the relative URL for the edit page
-    const relativeUrl = 'https://bipldev.sharepoint.com/sites/dheeraj/_layouts/15/workbench.aspx';
+    const relativeUrl = '/_layouts/15/workbench.aspx';
 
     // Construct the URL with the item ID and mode type set to 'Edit'
     var editUrl;
-      editUrl = `${relativeUrl}?itemID=${itemID}`
+    editUrl = `${this.siteUrl}${relativeUrl}?itemID=${itemID}`
     // Redirect to the edit URL
     window.location.href = editUrl;
   }
@@ -173,7 +195,6 @@ public handleEdit = (row: any) => {
     if (!results) return null;
     if (!results[2]) return '';
     var a = decodeURIComponent(results[2].replace(/\+/g, " "));
-
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
@@ -530,6 +551,17 @@ public handleEdit = (row: any) => {
           ],
           isEditable: false,
         });
+
+
+        //refresh url changing
+
+      const relativeUrl = '/_layouts/15/workbench.aspx';
+      // Construct the URL with the item ID and mode type set to 'Edit'
+      var myUrl;
+      myUrl = `${this.siteUrl}${relativeUrl}`
+      // Redirect to the edit URL
+      window.location.href = myUrl;
+      window.location.href = myUrl;
     } catch (error) {
       console.log('handleUpdate :: Error : ', error);
       alert('error in update');
@@ -547,260 +579,268 @@ public handleEdit = (row: any) => {
 
 
     return (
-      colData && (
-        <MaterialReactTable
-          displayColumnDefOptions={{
-            'mrt-row-actions': {
-              muiTableHeadCellProps: {
-                align: 'center',
-              },
-              size: 120,
-            },
-          }}
-          columns={this.state.columns}
-          data={     
-            colData
+      <>
+        <h1>
+          Form
+        </h1>
+        <>
+          <div >
+            <div >
+              <div >
+                <div >
+                  <h5 > Invoice Details
+                  </h5>
+                  <div >
+                  </div>
+                  <div >
+                    <div >
+                      <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1} required />
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <TextField label="CompanyName" name="CompanyName" value={this.state.CompanyName} onChange={this.handleChange1} required />
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <TextField
+                        label="Invoice Details"
+                        multiline
+                        rows={4} // Set the number of visible rows
+                        // value={textValue}
+                        // onChange={handleChange}
+                        name='Invoicedetails'
+                        value={this.state.Invoicedetails} onChange={this.handleChange1}
+                        required
+                      />
+
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <TextField label="Company Code" name="CompanyCode" value={this.state.CompanyCode} onChange={this.handleChange1} required />
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount.toString()} onChange={this.handleChange1} required />
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue.toString()} onChange={this.handleChange1} required />
+                    </div>
+                  </div>
+
+                  <div >
+                    <div>
+
+                    </div>
+                    <div >
+                      <PeoplePicker
+                        context={this.props.context}
+                        titleText="Select People"
+                        personSelectionLimit={3}
+                        showtooltip={true}
+                        // Use defaultSelectedUsers to set initial selected users
+                        defaultSelectedUsers={this.state.Approver}
+                        onChange={this.onPeoplePickerChange}
+                        ensureUser={true}
+                        principalTypes={[PrincipalType.User]}
+                        resolveDelay={1000}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div >
+                    <div >
+                      <Toggle
+                        label='IsApproved'
+                        id='toggleForApproval'
+                        checked={this.state.IsApproved}
+                        onText="Yes"
+                        offText="No"
+                        onChanged={this.handleToggleChange}
+                      />
+                    </div>
+                  </div>
+                  <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={this.state.Country} required />
+                </div>
+              </div>
+            </div>
+          </div>
+          ---------------------------------------------------------------------------------------------------------------------------------
+          {
+            this.state.isEditable == false && (
+              <PrimaryButton text="Add Row" onClick={this.handleAddRow} />
+            )
+
           }
-          // state={{ isLoading: true }}
-          enableColumnResizing
-          initialState={{ density: 'compact', pagination: { pageIndex: 0, pageSize: 100 }, showColumnFilters: true }}
-          columnResizeMode="onEnd"
-          positionToolbarAlertBanner="bottom"
-          enablePinning
-          // enableRowActions
-          // onEditingRowSave={this.handleSaveRowEdits}
-          // onEditingRowCancel={this.handleCancelRowEdits}
-          enableGrouping
-          enableStickyHeader
-          enableStickyFooter
-          enableDensityToggle={false}
-          enableExpandAll={false}
-          renderTopToolbarCustomActions={({ table }) => (
-            <Box
-              sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
-            >
-            </Box>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>ItemName</th>
+                <th>Comments</th>
+                <th>Action</th>
+                <th>File</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* here we're creating a record for each index */}
+              {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; Document: any }, index: number) => (
+                <tr key={index}>
+                  <td>
 
-          )}
-        />
-      )
-      // <>
-      //   <div >
-      //     <div >
-      //       <div >
-      //         <div >
-      //           <h5 > Invoice Details
-      //           </h5>
-      //           <div >
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField label="Invoice No " name="InvoiceNo" value={this.state.InvoiceNo} onChange={this.handleChange1} required />
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField label="CompanyName" name="CompanyName" value={this.state.CompanyName} onChange={this.handleChange1} required />
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField
-      //                 label="Invoice Details"
-      //                 multiline
-      //                 rows={4} // Set the number of visible rows
-      //                 // value={textValue}
-      //                 // onChange={handleChange}
-      //                 name='Invoicedetails'
-      //                 value={this.state.Invoicedetails} onChange={this.handleChange1}
-      //                 required
-      //               />
+                    <DatePicker
+                      value={record.Date}
+                      onSelectDate={(date) => this.handleDateChange(date, index, 'Date')}
+                      isRequired
+                    />
+                  </td>
+                  <td>
+                    <TextField
+                      value={record.ItemName}
+                      onChange={(ev, newValue) => this.handleChange(index, 'ItemName', newValue || '')}
+                      name={`ItemName_${index}`}
+                      required
+                    />
+                  </td>
+                  <td
+                    style={{ width: '40%' }}>
+                    <TextField
+                      value={record.Comments}
+                      onChange={(ev, newValue) => this.handleChange(index, 'Comments', newValue || '')}
+                      multiline
+                      rows={2}
+                      name={`Comments_${index}`}
+                    />
+                  </td>
+                  <td
+                    style={{ width: '15%' }}>
+                    {/* This button deletes single row */}
+                    <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
+                  </td>
+                  <td>
+                    <FilePicker
+                      buttonLabel="Attachment"
+                      buttonIcon="Attach"
+                      onSave={(result) => this.getSelectedFile(result, index)}
+                      onChange={(result) => this.getSelectedFile(result, index)}
+                      context={this.props.context}
+                      hideLinkUploadTab={true}
+                      hideOneDriveTab={true}
+                      hideStockImages={true}
+                      hideLocalUploadTab={true}
+                      hideSiteFilesTab={true}
+                    />
+                  </td>
+                  {data[index].Document && (
+                    data[index].Document.map((item: any) => {
+                      return (<>
+                        <div>fileName{item.fileName}</div>
+                        {/* <div>fileURL : {item.fileAbsoluteUrl}</div> */}
+                      </>)
+                    })
 
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField label="Company Code" name="CompanyCode" value={this.state.CompanyCode} onChange={this.handleChange1} required />
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField label="Invoice Amount" name="InvoiceAmount" type='number' value={this.state.InvoiceAmount.toString()} onChange={this.handleChange1} required />
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <TextField label="Basic Value" name="BasicValue" type='number' value={this.state.BasicValue.toString()} onChange={this.handleChange1} required />
-      //             </div>
-      //           </div>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      //           <div >
-      //             <div>
+          {/* Save as Draft button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
+          {
+            this.state.isEditable === false &&
+            (
+              <>
+                <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
+                <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
+              </>
+            )
+          }
 
-      //             </div>
-      //             <div >
-      //               <PeoplePicker
-      //                 context={this.props.context}
-      //                 titleText="Select People"
-      //                 personSelectionLimit={3}
-      //                 showtooltip={true}
-      //                 // Use defaultSelectedUsers to set initial selected users
-      //                 defaultSelectedUsers={this.state.Approver}
-      //                 onChange={this.onPeoplePickerChange}
-      //                 ensureUser={true}
-      //                 principalTypes={[PrincipalType.User]}
-      //                 resolveDelay={1000}
-      //                 required
-      //               />
-      //             </div>
-      //           </div>
-      //           <div >
-      //             <div >
-      //               <Toggle
-      //                 label='IsApproved'
-      //                 id='toggleForApproval'
-      //                 checked={this.state.IsApproved}
-      //                 onText="Yes"
-      //                 offText="No"
-      //                 onChanged={this.handleToggleChange}
-      //               />
-      //             </div>
-      //           </div>
-      //           <Dropdown placeholder="Select an option" id='dropDownCapexType' onChange={(event, option) => this.handleDropdownChange(event, option)} options={options} label='Country' selectedKey={this.state.Country} required />
-      //         </div>
-      //       </div>
-      //     </div>
-      //   </div>
-      //   ---------------------------------------------------------------------------------------------------------------------------------
-      //   {
-      //     this.state.isEditable == false && (
-      //       <PrimaryButton text="Add Row" onClick={this.handleAddRow} />
-      //     )
+          {/* Submit button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
 
-      //   }
-      //   <table>
-      //     <thead>
-      //       <tr>
-      //         <th>Date</th>
-      //         <th>ItemName</th>
-      //         <th>Comments</th>
-      //         <th>Action</th>
-      //         <th>File</th>
-      //       </tr>
-      //     </thead>
-      //     <tbody>
-      //       {/* here we're creating a record for each index */}
-      //       {data.map((record: { Date: any; ItemName: string; ParentID: string; Comments: string; Document: any }, index: number) => (
-      //         <tr key={index}>
-      //           <td>
+          {/* <DefaultButton text='test' onClick={() => this.handleSave(1, 'try')} /> */}
 
-      //             <DatePicker
-      //               value={record.Date}
-      //               onSelectDate={(date) => this.handleDateChange(date, index, 'Date')}
-      //               isRequired
-      //             />
-      //           </td>
-      //           <td>
-      //             <TextField
-      //               value={record.ItemName}
-      //               onChange={(ev, newValue) => this.handleChange(index, 'ItemName', newValue || '')}
-      //               name={`ItemName_${index}`}
-      //               required
-      //             />
-      //           </td>
-      //           <td
-      //             style={{ width: '40%' }}>
-      //             <TextField
-      //               value={record.Comments}
-      //               onChange={(ev, newValue) => this.handleChange(index, 'Comments', newValue || '')}
-      //               multiline
-      //               rows={2}
-      //               name={`Comments_${index}`}
-      //             />
-      //           </td>
-      //           <td
-      //             style={{ width: '15%' }}>
-      //             {/* This button deletes single row */}
-      //             <DefaultButton text="Delete" onClick={() => this.handleDeleteRow(index)} />
-      //           </td>
-      //           <td>
-      //             <FilePicker
-      //               buttonLabel="Attachment"
-      //               buttonIcon="Attach"
-      //               onSave={(result) => this.getSelectedFile(result, index)}
-      //               onChange={(result) => this.getSelectedFile(result, index)}
-      //               context={this.props.context}
-      //               hideLinkUploadTab={true}
-      //               hideOneDriveTab={true}
-      //               hideStockImages={true}
-      //               hideLocalUploadTab={true}
-      //               hideSiteFilesTab={true}
-      //             />
-      //           </td>
-      //           {data[index].Document && (
-      //             data[index].Document.map((item: any) => {
-      //               return (<>
-      //                 <div>fileName{item.fileName}</div>
-      //                 {/* <div>fileURL : {item.fileAbsoluteUrl}</div> */}
-      //               </>)
-      //             })
+          <PrimaryButton
+            style={{ backgroundColor: 'blue' }}
+            text="Cancel"
+            onClick={() => {
+              console.log('State before cancel:', this.state);
+              this.setState(
+                {
+                  InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
+                  CompanyName: '',
+                  Invoicedetails: '',
+                  CompanyCode: '',
+                  InvoiceAmount: NaN,
+                  BasicValue: NaN,
+                  Country: '',
+                  Approver: [],
+                  IsApproved: false,
+                  data: [
+                    { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null },
+                    { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null }
+                  ],
+                  isEditable: false,
+                },
 
-      //           )}
-      //         </tr>
-      //       ))}
-      //     </tbody>
-      //   </table>
+                //Here you can verify ,wether your state is empty after clicking on Cancel button or not. 
+                () => {
+                  console.log('State after cancel:', this.state);
+                }
+              );
+            }}
+          />
+          {
+            this.state.isEditable === true ? (< DefaultButton style={{ backgroundColor: 'magenta' }} text='Update' onClick={() => this.handleUpdate(this.state.editID)} />) : (<DefaultButton text='Edit' onClick={() => this.editForm(this.state.editID)} />)
+          }
 
-      //   {/* Save as Draft button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
-      //   {
-      //     this.state.isEditable === false &&
-      //     (
-      //       <>
-      //         <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
-      //         <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
-      //       </>
-      //     )
-      //   }
+        </>
+        {
+          colData && (
+            <MaterialReactTable
+              displayColumnDefOptions={{
+                'mrt-row-actions': {
+                  muiTableHeadCellProps: {
+                    align: 'center',
+                  },
+                  size: 120,
+                },
+              }}
+              columns={this.state.columns}
+              data={
+                colData
+              }
+              // state={{ isLoading: true }}
+              enableColumnResizing
+              initialState={{ density: 'compact', pagination: { pageIndex: 0, pageSize: 100 }, showColumnFilters: true }}
+              columnResizeMode="onEnd"
+              positionToolbarAlertBanner="bottom"
+              enablePinning
+              // enableRowActions
+              // onEditingRowSave={this.handleSaveRowEdits}
+              // onEditingRowCancel={this.handleCancelRowEdits}
+              enableGrouping
+              enableStickyHeader
+              enableStickyFooter
+              enableDensityToggle={false}
+              enableExpandAll={false}
+              renderTopToolbarCustomActions={({ table }) => (
+                <Box
+                  sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
+                >
+                </Box>
 
-      //   {/* Submit button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
+              )}
+            />
+          )
+        }
 
-      //   {/* <DefaultButton text='test' onClick={() => this.handleSave(1, 'try')} /> */}
-
-      //   <PrimaryButton
-      //     style={{ backgroundColor: 'blue' }}
-      //     text="Cancel"
-      //     onClick={() => {
-      //       console.log('State before cancel:', this.state);
-      //       this.setState(
-      //         {
-      //           InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
-      //           CompanyName: '',
-      //           Invoicedetails: '',
-      //           CompanyCode: '',
-      //           InvoiceAmount: NaN,
-      //           BasicValue: NaN,
-      //           Country: '',
-      //           Approver: [],
-      //           IsApproved: false,
-      //           data: [
-      //             { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null },
-      //             { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null }
-      //           ],
-      //           isEditable: false,
-      //         },
-
-      //         //Here you can verify ,wether your state is empty after clicking on Cancel button or not. 
-      //         () => {
-      //           console.log('State after cancel:', this.state);
-      //         }
-      //       );
-      //     }}
-      //   />
-      //   {
-      //     this.state.isEditable === true ? (< DefaultButton style={{ backgroundColor: 'magenta' }} text='Update' onClick={() => this.handleUpdate(106)} />) : (<DefaultButton text='Edit' onClick={() => this.editForm(106)} />)
-      //   }
-
-      // </>
+      </>
     );
   }
 }

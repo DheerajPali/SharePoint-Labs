@@ -24,4 +24,5 @@ export interface IFormWebpartAdd{
     colData: any;
     ItemID : string,
     columns: any,
+    editID : number,
 }

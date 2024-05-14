@@ -30,5 +30,6 @@ export interface IFormWebpartState{
     ItemID : string,
     isEditable : boolean,
     columns : any,
+    editID : number,
   }
   
