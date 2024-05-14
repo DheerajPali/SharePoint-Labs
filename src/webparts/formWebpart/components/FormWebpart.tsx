@@ -21,6 +21,53 @@ import "@pnp/sp/site-users/web";
 import { ISiteUser } from "@pnp/sp/site-users/";
 // import { IFormWebpartState, IWebpart7State } from './IFormWebpartState';
 
+import { MaterialReactTable } from 'material-react-table';
+import { Box, Button } from '@mui/material';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+
+const headerColumn :any=  [
+  {
+    header: 'Invoice No',
+    accessorKey: 'colInvoiceNo',
+    size: 120,
+  },
+  {
+    header: 'Company Name',
+    accessorKey: 'colCompanyName',
+    size: 120,
+  },
+  {
+    header: 'Invoice Details',
+    accessorKey: 'colInvoicedetails',
+    size: 120,
+  },
+  {
+    header: 'Invoice Amount',
+    accessorKey: 'colInvoiceAmount',
+    size: 120,
+  },
+  {
+    header: 'Basic Value',
+    accessorKey: 'colBasicValue',
+    size: 120,
+  },
+  {
+    header: 'Country',
+    accessorKey: 'colCountry',
+    size: 120,
+  },
+  {
+    header: 'IsApproved',
+    accessorKey: 'colIsApproved',
+    size: 120,
+  },
+  {
+    header: 'Approver',
+    accessorKey: 'colApprover',
+    size: 120,
+  }
+];
+
 export default class FormWebpart extends React.Component<IFormWebpartProps, IFormWebpartState> {
   constructor(props: IFormWebpartProps) {
     super(props);
@@ -52,6 +99,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
       isEditable: false,
     };
   }
+
 
   public componentDidMount = async () => {
     await this.fetchChoiceOptions();
@@ -659,7 +707,47 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
           this.state.isEditable === true ? (< DefaultButton style={{ backgroundColor: 'magenta' }} text='Update' onClick={() => this.handleUpdate(106)} />) : (<DefaultButton text='Edit' onClick={() => this.editForm(106)} />)
         }
 
-
+<MaterialReactTable
+          displayColumnDefOptions={{
+            'mrt-row-actions': {
+              muiTableHeadCellProps: {
+                align: 'center',
+              },
+              size: 120,
+            },
+          }}
+          columns={headerColumn}
+          data={[]}
+          // state={{ isLoading: true }}
+          enableColumnResizing
+          initialState={{ density: 'compact', pagination: { pageIndex: 0, pageSize: 100 }, showColumnFilters: true }}
+          columnResizeMode="onEnd"
+          positionToolbarAlertBanner="bottom"
+          enablePinning
+          // enableRowActions
+          // onEditingRowSave={this.handleSaveRowEdits}
+          // onEditingRowCancel={this.handleCancelRowEdits}
+          enableGrouping
+          enableStickyHeader
+          enableStickyFooter
+          enableDensityToggle={false}
+          enableExpandAll={false}
+          renderTopToolbarCustomActions={({ table }) => (
+            <Box
+              sx={{ display: 'flex', gap: '1rem', p: '0.5rem', flexWrap: 'wrap' }}
+            >
+              <Button
+                disabled={table.getRowModel().rows.length === 0}
+                //export all rows as seen on the screen (respects pagination, sorting, filtering, etc.)
+                // onClick={() => this.onExportToExcel(table.getRowModel().rows)}
+                startIcon={<FileDownloadIcon />}
+                variant="contained"
+              >
+                Export All Data
+              </Button>
+            </Box>
+          )}
+        />
       </>
     );
   }
