@@ -17,6 +17,8 @@ import { IFormWebpartAdd } from './IFormWebpartAdd';
 import { Field } from '@pnp/sp/fields';
 import { IFormWebpartState } from './IFormWebpartState';
 import { FilePicker, IFilePickerResult } from '@pnp/spfx-controls-react';
+import "@pnp/sp/site-users/web";
+import { ISiteUser } from "@pnp/sp/site-users/";
 // import { IFormWebpartState, IWebpart7State } from './IFormWebpartState';
 
 export default class FormWebpart extends React.Component<IFormWebpartProps, IFormWebpartState> {
@@ -47,11 +49,30 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
       Country: '',
       CountryOptions: [],
       ItemID: '',
+      isEditable: false,
     };
   }
 
   public componentDidMount = async () => {
     await this.fetchChoiceOptions();
+    //Here we're getting our parameter "itemID" using queryString. 
+    let itemID = this.getParameterByName("itemID", window.location.href);
+    if(itemID){
+      await this.editForm(Number(itemID));
+    }
+  }
+
+  //This method provides us the value of given parameter inside our url.
+  public getParameterByName(name: string, url: any) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    var a = decodeURIComponent(results[2].replace(/\+/g, " "));
+
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
   //this method is created to fetch the choice options inside a field. 
@@ -261,8 +282,160 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
     this.setState({ data: newData });
   }
 
+
+  //This method fetch all the records of given id ,and make it editable. 
+  public editForm = async (itemId: number) => {
+    this.setState({
+      isEditable: true,
+    })
+    const sp: any = spfi().using(SPFx(this.props.context));
+
+    try {
+      // Fetch data from the parent list (InvoiceDetails) using the provided itemId
+      const parentListData = await sp.web.lists.getByTitle("InvoiceDetails").items.getById(itemId)();
+
+      // Retrieve ApproverId array from parentListData
+      const approverIds: number[] = parentListData.ApproverId;
+
+      // If no approverIds are found, return early or handle accordingly
+      if (!approverIds || approverIds.length === 0) {
+        console.warn('No Approvers found for the given Invoice.');
+        return;
+      }
+
+      // Fetch user data for each ApproverId using Promise.all to perform parallel requests
+      const approverRequests = approverIds.map((approverId: number) => {
+        return sp.web.getUserById(approverId)();
+      });
+
+      // Resolve all user data requests
+      const approvers = await Promise.all(approverRequests);
+
+      // Map fetched user data to a suitable format (e.g., convert to array of approver objects)
+      const mappedApprovers = approvers.map((approver: any) => ({
+        id: approver.Id,
+        secondaryText: approver.Email,
+        text: approver.Title,
+        imageInitials: approver.imageInitials,
+        imageUrl: approver.imageUrl,
+        loginName: approver.loginName,
+        optionalText: approver.optionalText,
+        tertiaryText: approver.tertiaryText,
+        // Add more fields as needed
+      }));
+
+      // Fetch childListData using the itemId to get related child items (if required)
+      const childListData = await sp.web.lists.getByTitle("ChildList").items.filter(`ParentID eq ${itemId}`)();
+      const fileItem = await sp.web.lists.getByTitle('DocLibrary1').items.filter(`ItemID eq ${childListData[0].ID}`)();
+      // this.setState({
+      //   Document : fileItem,
+      // })
+      const newData = [...this.state.data];
+      newData[0].Document = fileItem; // Store selected file in Document field
+      this.setState({ data: newData });
+      // const fileId = fileItem.Id;
+      // const a = await sp.web.lists.getByTitle("ChildList").items.getById(fileId).update({
+
+      // })
+
+      // Update component state with fetched data
+      this.setState({
+        ...parentListData,
+        Approver: mappedApprovers,
+        data: childListData.map((item: any) => ({
+          Date: new Date(item.Date),
+          ItemName: item.ItemName,
+          ParentIDId: item.ParentIDId,
+          Comments: item.Comments,
+        }))
+      });
+    } catch (error) {
+      console.error('Error fetching item data:', error);
+      // Handle error appropriately (e.g., show error message to user)
+      alert('Failed to fetch item data. Please try again.');
+    }
+  }
+
+//This method update the state using id of a perticular record. 
+  public handleUpdate = async (itemId: number) => {
+    try {
+      const { InvoiceNo, CompanyName, Invoicedetails, CompanyCode, InvoiceAmount, BasicValue, Country, IsApproved, Approver
+      } = this.state as {
+        InvoiceNo: string;
+        CompanyName: string;
+        Invoicedetails: string;
+        CompanyCode: string;
+        InvoiceAmount: number;
+        BasicValue: number;
+        Country: string;
+        IsApproved: boolean,
+        Approver: any,
+      }
+      const sp: any = spfi().using(SPFx(this.props.context));
+      const approverIds = Approver && Approver.map((person: { id: any; }) => person.id);
+      // const user = selectectedPerson.id;
+      const list = await sp.web.lists.getByTitle("InvoiceDetails").items.getById(itemId).update({
+        'InvoiceNo': InvoiceNo,
+        'CompanyName': CompanyName,
+        'Invoicedetails': Invoicedetails,
+        'CompanyCode': CompanyCode,
+        'InvoiceAmount': InvoiceAmount,
+        'BasicValue': BasicValue,
+        'Country': Country,
+        ApproverId: approverIds,
+        'IsApproved': IsApproved
+      });
+
+      const { data } = this.state;
+      // await this.handleSave(itemId, status);
+      // const sp: any = spfi().using(SPFx(this.props.context));
+      // const list1 = await sp.web.lists.getByTitle("ChildList");
+      const statusValue = 'Updated'
+      // data.map((record:any,index: number) => {
+      //   record[index] = data[index];
+      // });
+
+      // for (const record of data) {
+
+      const addedItem1 = await sp.web.lists.getByTitle("ChildList").items.filter(`ParentID eq ${itemId}`)();
+      for (let i = 0; i < data.length; i++) {
+        const myId = addedItem1[i].ID;
+        await sp.web.lists.getByTitle("ChildList").items.getById(myId).update({
+          Date: data[i].Date,
+          ItemName: data[i].ItemName,
+          // ParentIDId: parseInt(itemId),
+          Comments: data[i].Comments,
+          Status: statusValue
+        });
+      }
+
+      // }
+
+      this.setState(
+        {
+          InvoiceNo: Math.floor(Math.random() * 10000000).toString(),
+          CompanyName: '',
+          Invoicedetails: '',
+          CompanyCode: '',
+          InvoiceAmount: NaN,
+          BasicValue: NaN,
+          Country: '',
+          Approver: [],
+          IsApproved: false,
+          data: [
+            { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null },
+            { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null }
+          ],
+          isEditable: false,
+        });
+    } catch (error) {
+      console.log('handleUpdate :: Error : ', error);
+      alert('error in update');
+    }
+  }
   public render(): React.ReactElement<IFormWebpartProps> {
     const { data } = this.state;
+    // const docData = this.state.data;
     const options: IDropdownOption[] = this.state.CountryOptions.map((option: string) => ({
       key: option,
       text: option,
@@ -358,7 +531,12 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
           </div>
         </div>
         ---------------------------------------------------------------------------------------------------------------------------------
-        <PrimaryButton text="Add Row" onClick={this.handleAddRow} />
+        {
+          this.state.isEditable == false && (
+            <PrimaryButton text="Add Row" onClick={this.handleAddRow} />
+          )
+
+        }
         <table>
           <thead>
             <tr>
@@ -418,16 +596,33 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
                     hideSiteFilesTab={true}
                   />
                 </td>
+                {data[index].Document && (
+                  data[index].Document.map((item: any) => {
+                    return (<>
+                      <div>fileName{item.fileName}</div>
+                      {/* <div>fileURL : {item.fileAbsoluteUrl}</div> */}
+                    </>)
+                  })
+
+                )}
               </tr>
             ))}
           </tbody>
         </table>
 
         {/* Save as Draft button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
-        <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
+        {
+          this.state.isEditable === false &&
+          (
+            <>
+              <DefaultButton text="Save as Draft" onClick={() => this.handleAdd('Draft')} />
+              <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
+            </>
+          )
+        }
 
         {/* Submit button workflow --> handleAdd(status) :: handleSave(addedItemId, statusValue) */}
-        <PrimaryButton text="Submit" onClick={() => this.handleAdd('Submit')} />
+
         {/* <DefaultButton text='test' onClick={() => this.handleSave(1, 'try')} /> */}
 
         <PrimaryButton
@@ -450,6 +645,7 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
                   { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null },
                   { Date: new Date(), ItemName: '', ParentID: '', Comments: '', Document: null }
                 ],
+                isEditable: false,
               },
 
               //Here you can verify ,wether your state is empty after clicking on Cancel button or not. 
@@ -459,6 +655,10 @@ export default class FormWebpart extends React.Component<IFormWebpartProps, IFor
             );
           }}
         />
+        {
+          this.state.isEditable === true ? (< DefaultButton style={{ backgroundColor: 'magenta' }} text='Update' onClick={() => this.handleUpdate(106)} />) : (<DefaultButton text='Edit' onClick={() => this.editForm(106)} />)
+        }
+
 
       </>
     );
