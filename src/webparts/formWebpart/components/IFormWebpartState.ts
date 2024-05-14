@@ -26,8 +26,9 @@ export interface IFormWebpartState{
     // columns: any;
     CountryOptions: [];
     // data1: [];
-
+    colData : any,
     ItemID : string,
     isEditable : boolean,
+    columns : any,
   }
   
