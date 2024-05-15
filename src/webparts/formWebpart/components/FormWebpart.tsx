@@ -31,7 +31,9 @@ import "@pnp/sp/site-users/web";
 import { MaterialReactTable } from "material-react-table";
 import { Box, Button } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { CSVLink } from "react-csv";
+import { forEach } from "lodash";
 
 export default class FormWebpart extends React.Component<
   IFormWebpartProps,
@@ -52,9 +54,15 @@ export default class FormWebpart extends React.Component<
         },
         Cell: ({ row }: any) => (
           <Box>
-            <div onClick={() => this.handleEdit(row.original.Id)}>
-              <EditIcon />
+            <div style={{display:'flex',justifyContent:'space-evenly'}}>
+              <div onClick={() => this.handleEdit(row.original.Id)}>
+                <EditIcon />
+              </div>
+              <div onClick={() => this.hanldeDeleteRecord(row.original.Id)}>
+                <DeleteIcon />
+              </div>
             </div>
+
           </Box>
         ),
         enableColumnFilter: true,
@@ -212,6 +220,26 @@ export default class FormWebpart extends React.Component<
     await this.getAll();
   };
 
+
+  //This method deletes a perticular record with all of it's childs record . 
+  //Takes id of record as a parameter.
+  public hanldeDeleteRecord = async (id: number) => {
+    try {
+      const sp: any = spfi().using(SPFx(this.props.context));
+      const childIds: any = await sp.web.lists.getByTitle("ChildList").items.filter(`ParentID eq ${id}`).select("Id")();
+      childIds && (
+        childIds.map(async (record: any) => {
+          const childToDelete = await sp.web.lists.getByTitle("ChildList").items.getById(Number(record.ID)).delete();
+        })
+      )
+      const itemToDelete = await sp.web.lists.getByTitle("InvoiceDetails").items.getById(id).delete();
+      alert('Deleted Successfully')
+      this.getAll();
+    } catch (error) {
+      alert('Error in deleting record');
+      console.log("handleDeleteRecord :: Error:", error);
+    }
+  }
   public handleEdit = (id: number) => {
     // Extract the item ID from the row data
     // const ActivityId = row.original.id;
