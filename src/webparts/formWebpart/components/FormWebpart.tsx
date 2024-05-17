@@ -58,11 +58,13 @@ export default class FormWebpart extends React.Component<
               <div onClick={() => this.handleEdit(row.original.Id)}>
                 <EditIcon />
               </div>
-              <div onClick={() => this.hanldeDeleteRecord(row.original.Id)}>
+              {/* <div onClick={() => this.hanldeDeleteRecord(row.original.Id)}>
+                <DeleteIcon />
+              </div> */}
+              <div onClick={() => this.handleSoftDelete(row.original.Id)}>
                 <DeleteIcon />
               </div>
             </div>
-
           </Box>
         ),
         enableColumnFilter: true,
@@ -204,6 +206,7 @@ export default class FormWebpart extends React.Component<
       colData: null,
       columns: headerColumn,
       editID: NaN,
+      IsDeleted : false,
     };
   }
 
@@ -240,6 +243,23 @@ export default class FormWebpart extends React.Component<
       console.log("handleDeleteRecord :: Error:", error);
     }
   }
+
+  public handleSoftDelete = async(id : number) =>{
+    // const {
+    //   IsDeleted
+    // } = this.state as {
+    //   IsDeleted : boolean;
+    // };
+    const sp: any = spfi().using(SPFx(this.props.context));
+    const list = await sp.web.lists
+      .getByTitle("InvoiceDetails")
+      .items.getById(id)
+      .update({
+        IsDeleted  : true,
+      });
+    alert('Deleted Successfully');
+    this.getAll();
+  }
   public handleEdit = (id: number) => {
     // Extract the item ID from the row data
     // const ActivityId = row.original.id;
@@ -262,9 +282,10 @@ export default class FormWebpart extends React.Component<
   public getAll = async () => {
     try {
       const sp: any = spfi().using(SPFx(this.props.context));
+      const val:boolean = false;
       const items = await sp.web.lists
         .getByTitle("InvoiceDetails")
-        .items.select(
+        .items.filter(`IsDeleted eq ${val}`).select(
           "ID",
           "InvoiceNo",
           "CompanyName",
@@ -275,7 +296,8 @@ export default class FormWebpart extends React.Component<
           "IsApproved",
           "Country",
           "Approver/Title",
-          "Approver/EMail"
+          "Approver/EMail",
+          // "IsDeleted",
         )
         .expand("Approver")();
       console.log("Retrieved items:", items); // Log retrieved items for debugging

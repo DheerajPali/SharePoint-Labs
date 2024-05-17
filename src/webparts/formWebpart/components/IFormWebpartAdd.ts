@@ -25,4 +25,5 @@ export interface IFormWebpartAdd{
     ItemID : string,
     columns: any,
     editID : number,
+    IsDeleted : boolean,
 }
