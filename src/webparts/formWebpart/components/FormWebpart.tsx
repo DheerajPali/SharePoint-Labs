@@ -779,7 +779,7 @@ export default class FormWebpart extends React.Component<
     return (
       <>
         <h1>Formdata</h1>
-        {this.state.editID && (
+        {(this.state.editID>0)&& (
           <>
             <div>
               <div>
