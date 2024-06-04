@@ -40,7 +40,7 @@ export default class FormWebpart extends React.Component<
   IFormWebpartState
 > {
   public siteUrl: any = this.props.context.pageContext.web.absoluteUrl;
-  public relativeUrl = "/_layouts/15/workbench.aspx";
+  public relativeUrl = "/SitePages/Invoice.aspx";
   public csvExporter: any;
   constructor(props: IFormWebpartProps) {
     super(props);
@@ -891,7 +891,7 @@ export default class FormWebpart extends React.Component<
                           personSelectionLimit={3}
                           showtooltip={true}
                           // Use defaultSelectedUsers to set initial selected users
-                          defaultSelectedUsers={this.state.Approver}
+                          defaultSelectedUsers={this.state.Approver.map((user: any)=>user.text)}
                           onChange={this.onPeoplePickerChange}
                           ensureUser={true}
                           principalTypes={[PrincipalType.User]}
